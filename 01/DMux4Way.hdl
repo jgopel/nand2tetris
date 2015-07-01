@@ -16,16 +16,7 @@ CHIP DMux4Way {
 	OUT a, b, c, d;
 
 	PARTS:
-	Not( in=sel[1], out=notSel1 );
-	Not( in=sel[0], out=notSel0 );
-
-	And( a=notSel1, b=notSel0, out=sela );
-	And( a=notSel1, b=sel[0],  out=selb );
-	And( a=sel[1],  b=notSel0, out=selc );
-	And( a=sel[1],  b=sel[0],  out=seld );
-
-	And( a=in, b=sela, out=a );
-	And( a=in, b=selb, out=b );
-	And( a=in, b=selc, out=c );
-	And( a=in, b=seld, out=d );
+	DMux( in=in, sel=sel[1], a=dmux1, b=dmux2 );
+	DMux( in=dmux1, sel=sel[0], a=a, b=b );
+	DMux( in=dmux2, sel=sel[0], a=c, b=d );
 }
