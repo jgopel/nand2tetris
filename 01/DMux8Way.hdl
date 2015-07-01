@@ -12,9 +12,11 @@
  */
 
 CHIP DMux8Way {
-    IN in, sel[3];
-    OUT a, b, c, d, e, f, g, h;
+	IN in, sel[3];
+	OUT a, b, c, d, e, f, g, h;
 
-    PARTS:
-    // Put your code here:
+	PARTS:
+	DMux( in=in, sel=sel[2], a=dmux1, b=dmux2 );
+	DMux4Way( in=dmux1, sel[1]=sel[1], sel[0]=sel[0], a=a, b=b, c=c, d=d );
+	DMux4Way( in=dmux2, sel[1]=sel[1], sel[0]=sel[0], a=e, b=f, c=g, d=h );
 }
