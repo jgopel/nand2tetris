@@ -7,7 +7,7 @@
  * The ALU (Arithmetic Logic Unit).
  * Computes one of the following functions:
  * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
- * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs, 
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs,
  * according to 6 input bits denoted zx,nx,zy,ny,f,no.
  * In addition, the ALU computes two 1-bit outputs:
  * if the ALU output == 0, zr is set to 1; otherwise zr is set to 0;
@@ -27,20 +27,38 @@
 // if (out < 0) set ng = 1
 
 CHIP ALU {
-    IN  
-        x[16], y[16],  // 16-bit inputs        
-        zx, // zero the x input?
-        nx, // negate the x input?
-        zy, // zero the y input?
-        ny, // negate the y input?
-        f,  // compute out = x + y (if 1) or x & y (if 0)
-        no; // negate the out output?
+   IN
+      x[16], y[16],  // 16-bit inputs
+      zx, // zero the x input?
+      nx, // negate the x input?
+      zy, // zero the y input?
+      ny, // negate the y input?
+      f,  // compute out = x + y (if 1) or x & y (if 0)
+      no; // negate the out output?
 
-    OUT 
-        out[16], // 16-bit output
-        zr, // 1 if (out == 0), 0 otherwise
-        ng; // 1 if (out < 0),  0 otherwise
+   OUT
+      out[16], // 16-bit output
+      zr, // 1 if (out == 0), 0 otherwise
+      ng; // 1 if (out < 0),  0 otherwise
 
-    PARTS:
-   // Put you code here:
+   PARTS:
+   Mux16( a=x, b=false, sel=zx, out=Xmux1 );
+   Not16( in=Xmux1, out=notX );
+   Mux16( a=Xmux1, b=notX, sel=nx, out=Xmux2 );
+
+   Mux16( a=y, b=false, sel=zy, out=Ymux1 );
+   Not16( in=Ymux1, out=notY );
+   Mux16( a=Ymux1, b=notY, sel=ny, out=Ymux2 );
+
+   And16( a=Xmux2, b=Ymux2, out=XandY );
+   Add16( a=Xmux2, b=Ymux2, out=XaddY );
+
+   Mux16( a=XandY, b=XaddY, sel=f, out=XmuxY );
+   Not16( in=XmuxY, out=notXY );
+   Mux16( a=XmuxY, b=notXY, sel=no, out=out, out[0..7]=outlower, out[8..15]=outupper, out[15]=ng );
+
+   Or8Way( in=outlower, out=orlower );
+   Or8Way( in=outupper, out=orupper );
+   Or( a=orlower, b=orupper, out=notzr );
+   Not( in=notzr, out=zr );
 }
