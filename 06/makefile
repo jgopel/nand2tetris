@@ -17,10 +17,11 @@ debug: $(TARGET)
 pedantic: CFLAGS += -Wextra -pedantic
 pedantic: debug
 
-release: $(CFLAGS) += -O3
+release: CFLAGS += -O3
+release: $(TARGET)
 
 
-$(TARGET): $(OBJECTS)
+$(TARGET): $(OBJECTS) $(@:=.d)
 	@echo
 	@echo " Linking..."
 	$(CC) $(CFLAGS) -o $@ $^
@@ -31,10 +32,19 @@ $(SRCDIR)/$(OBJDIR)/%.o: %.c
 	@mkdir -p $(SRCDIR)/$(OBJDIR)
 	$(CC) $(CFLAGS) -c -o $@ $^
 
+%.d:
+	@echo
+	@echo " Generating dependencies..."
+	$(CC) -MM -MT "$(SRCDIR)/$(OBJDIR)/$(@:.d=.o) $(SRCDIR)/$@" -MF $@ $(@:.d=.c)
 
-.PHONY: clean clobber cleanobj cleanexe
-clean: cleanobj
-clobber: cleanobj cleanexe
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(SOURCES:.c=.d)
+endif
+
+.PHONY: clean clobber cleanobj cleanexe cleanmake
+clean: cleanobj cleanmake
+clobber: clean cleanexe
 
 cleanobj:
 	@echo
@@ -45,3 +55,8 @@ cleanexe:
 	@echo
 	@echo " Cleaning executables..."
 	rm -frv *.exe $(TARGET)
+
+cleanmake:
+	@echo
+	@echo " Cleaning dependency files..."
+	rm -frv *.d
