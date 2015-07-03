@@ -1,6 +1,6 @@
 CC := gcc
 SRCDIR := .
-OBJDIR := OBJDIR
+OBJDIR := objdir
 CFLAGS := -std=c11
 
 TARGET := $(SRCDIR)/assembler
@@ -18,6 +18,18 @@ pedantic: CFLAGS += -Wextra -pedantic
 pedantic: debug
 
 release: $(CFLAGS) += -O3
+
+
+$(TARGET): $(OBJECTS)
+	@echo
+	@echo " Linking..."
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(SRCDIR)/$(OBJDIR)/%.o: %.c
+	@echo
+	@echo " Building objects..."
+	@mkdir -p $(SRCDIR)/$(OBJDIR)
+	$(CC) $(CFLAGS) -c -o $@ $^
 
 
 .PHONY: clean clobber cleanobj cleanexe
