@@ -2,16 +2,25 @@
 #include "jg-input.h"
 #include "jg-files.h"
 
-void open_specified_file( FILE *fp ) {
+/**
+ * Opens a file based on user input
+ *
+ * @author Jonathan Gopel
+ * @param fp Pointer to hold the file. Must start NULL
+ */
+FILE *open_specified_file() {
 	// Setup variables
+	FILE *fp;
 	char *string;
 
 	// Iterate through loop until valid file input is given
 	while ( fp == NULL ) {
 		printf( "\nFile to use: " );
-		string = read_line( stdin );
+		string = read_line_io();
 		fp = fopen( string, "r" );
 	}
+
+	return fp;
 }
 
 /**

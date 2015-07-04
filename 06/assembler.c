@@ -13,17 +13,10 @@ void build_list( list_node_t*, FILE* );
 void add_char_to_string( char*, char );
 
 int main( void ) {
-	// Setup variables
-	FILE *file_pointer = NULL;
-	char *string;
+	// TODO: Reenable this
+	// FILE *file_pointer = open_specified_file();
 
-	// Get to read
-	// open_specified_file( file_pointer );
-	while ( file_pointer == NULL ) {
-		printf( "\nFile to use: " );
-		string = read_line();
-		file_pointer = fopen( string, "r" );
-	}
+	file_pointer = fopen( "add/Add.asm", "r" );
 
 	// Split file to linked list
 	list_node_t *head = malloc( sizeof( list_node_t ) );
@@ -39,10 +32,9 @@ int main( void ) {
 }
 
 void build_list( list_node_t *current, FILE *fp ) {
-	// Setup variables
-	size_t length = 0;
-
-	while( ( getline( &current->command, &length, fp ) ) != -1 ) {
-		current = current->next;
+	char *string = read_line( fp );
+	while( string != NULL ) {
+		printf( "%s", string );
+		string = read_line( fp );
 	}
 }

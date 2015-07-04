@@ -1,7 +1,7 @@
 #ifndef JG_FILES_H_ // Prevent including twice
 #define JG_FILES_H_
 
-void open_specified_file( FILE* );
+FILE *open_specified_file();
 unsigned int count_lines( FILE* );
 
 #endif
