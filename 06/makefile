@@ -14,7 +14,7 @@ all: debug
 debug: CFLAGS += -g -Og -Wall
 debug: $(TARGET)
 
-pedantic: CFLAGS += -Wextra -pedantic
+pedantic: CFLAGS += -Wextra -pedantic -Werror
 pedantic: debug
 
 release: CFLAGS += -O3
@@ -30,7 +30,7 @@ $(SRCDIR)/$(OBJDIR)/%.o: %.c
 	@echo
 	@echo " Building objects..."
 	@mkdir -p $(SRCDIR)/$(OBJDIR)
-	$(CC) $(CFLAGS) -c -o $@ $^
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.d:
 	@echo
