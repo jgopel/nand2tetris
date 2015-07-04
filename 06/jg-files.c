@@ -10,7 +10,7 @@
  */
 FILE *open_specified_file() {
 	// Setup variables
-	FILE *fp;
+	FILE *fp = NULL;
 	char *string;
 
 	// Iterate through loop until valid file input is given
