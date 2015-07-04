@@ -11,8 +11,11 @@ OBJECTS := $(patsubst $(SRCDIR)/%.c,$(SRCDIR)/$(OBJDIR)/%.o,$(SOURCES))
 
 all: debug
 
-debug: CFLAGS += -g -Og -Wall
+debug: CFLAGS += -g -Wall
 debug: $(TARGET)
+
+Og: CFLAGS += -Og
+Og: debug
 
 pedantic: CFLAGS += -Wextra -pedantic -Werror
 pedantic: debug
