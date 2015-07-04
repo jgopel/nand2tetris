@@ -4,7 +4,7 @@
 #include "jg-files.h"
 
 typedef struct list_node {
-	char *command;
+	char *assembler;
 	unsigned int machine_language;
 	struct list_node *next;
 } list_node_t;
@@ -16,7 +16,7 @@ int main( void ) {
 	// TODO: Reenable this
 	// FILE *file_pointer = open_specified_file();
 
-	file_pointer = fopen( "add/Add.asm", "r" );
+	FILE *file_pointer = fopen( "add/Add.asm", "r" );
 
 	// Split file to linked list
 	list_node_t *head = malloc( sizeof( list_node_t ) );
@@ -32,9 +32,27 @@ int main( void ) {
 }
 
 void build_list( list_node_t *current, FILE *fp ) {
+	// Set first line
 	char *string = read_line( fp );
-	while( string != NULL ) {
-		printf( "%s", string );
+
+	// Iterate through the file
+	while( 1 ) {
+		// Clean up any trailing characters
+		character_to_null( string, '\n' );
+		character_to_null( string, '\r' );
+
+		// Store string
+		current->assembler = string;
+
+		// Setup for next iteration
 		string = read_line( fp );
+
+		// Check for termination conditions
+		if ( string == NULL ) {
+			break;
+		} else {
+			current->next = malloc( sizeof( list_node_t ) );
+			current = current->next;
+		}
 	}
 }
