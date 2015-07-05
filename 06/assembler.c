@@ -132,12 +132,6 @@ unsigned int c_instruction( char *assembly ) {
 		command = strtok( NULL, "=" );
 	}
 
-	// XXX: Debug only
-	printf( "\n" );
-	printf( "\n Command:     %s", command );
-	printf( "\n Destination: %s", destination );
-	printf( "\n Jump:        %s", jump );
-
 	// Set a (12th) bit
 	char *m_position = strchr( command, 'M' );
 	if ( m_position != NULL ) {
