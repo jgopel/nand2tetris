@@ -46,8 +46,9 @@ int main( void ) {
  * @param current Current element of the linked list
  * @param fp      Assembly file
  */
-void build_list( list_node_t *current, FILE *fp ) {
+void build_list( list_node_t *head, FILE *fp ) {
 	// Setup variables
+	list_node_t *current = head;
 	char *string = read_line( fp );
 
 	while ( string != NULL ) {
@@ -81,4 +82,6 @@ void build_list( list_node_t *current, FILE *fp ) {
 void generate_machine_language( list_node_t *current ) {
 	// A Instruction: 0vvv vvvv vvvv vvvv
 	// C Instruction: 111a cccc ccdd djjj
+
+
 }
