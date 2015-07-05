@@ -45,9 +45,9 @@ ifneq ($(MAKECMDGOALS),clean)
 -include $(SOURCES:.c=.d)
 endif
 
-.PHONY: clean clobber cleanobj cleanexe cleanmake
+.PHONY: clean clobber cleanobj cleanexe cleanmake cleanstackdump
 clean: cleanobj cleanmake
-clobber: clean cleanexe
+clobber: clean cleanexe cleanstackdump
 
 cleanobj:
 	@echo
@@ -63,3 +63,8 @@ cleanmake:
 	@echo
 	@echo " Cleaning dependency files..."
 	rm -frv *.d
+
+cleanstackdump:
+	@echo
+	@echo " Cleaning stack dumps..."
+	rm -frv *.stackdump

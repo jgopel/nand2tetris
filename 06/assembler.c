@@ -24,7 +24,7 @@ int main( void ) {
 	FILE *file_pointer = fopen( "add/Add.asm", "r" );
 
 	// Split file to linked list
-	list_node_t *head = calloc( 1, sizeof( list_node_t ) );
+	list_node_t *head = malloc( sizeof( list_node_t ) );
 	build_list( head, file_pointer );
 	fclose( file_pointer );
 
@@ -35,9 +35,6 @@ int main( void ) {
 		current = current->next;
 	}
 
-	// Remove blank lines and comments
-	clean_list( &head );
-
 	// Iterate through array and replace array elements with their equivalent machine language code
 
 	// Output array to file
@@ -47,69 +44,36 @@ int main( void ) {
 }
 
 void build_list( list_node_t *current, FILE *fp ) {
-	// Set first line
+	// Setup variables
 	char *string = read_line( fp );
 
-	// Iterate through the file
-	while ( 1 ) {
-		// Clean up any trailing characters
+	while( string != NULL ) {
+		// Clean up trailing characters
 		character_to_null( string, '\n' );
 		character_to_null( string, '\r' );
 
-		// Setup node
-		current->assembler = string;
-		current->machine_language = 0b0;
+		// Remove comments and strip spaces
+		string = strip_comments( string );
+		string = trim_spaces( string );
 
-		// Setup for next iteration
+		if ( strlen( string ) > 1 ) {
+			// Store string in current node if current node is unused (mostly just first instance)
+			if ( current->assembler == NULL ) {
+				current->assembler = string;
+				current->machine_language = 0b0;
+			// Otherwise create node for the string to go into and store it there
+			} else {
+				current->next = malloc( sizeof( list_node_t ) );
+				current = current->next;
+
+				current->assembler = string;
+				current->machine_language = 0b0;
+			}
+		}
+
 		string = read_line( fp );
-
-		// Check for termination conditions
-		if ( string == NULL ) {
-			current->next = NULL;
-			break;
-		} else {
-			current->next = malloc( sizeof( list_node_t ) );
-			current = current->next;
-		}
 	}
-}
-
-void clean_list( list_node_t **head ) {
-	// Setup variables
-	list_node_t *current = *head;
-
-	// Get a valid first item to work with
-	while( current == *head ) {
-		// Clean string
-		current->assembler = strip_comments( current->assembler );
-		current->assembler = trim_spaces( current->assembler );
-
-		if( strlen( current->assembler ) < 1 ) {
-			list_pop( head );
-			current = *head;
-		} else {
-			current = current->next;
-		}
-	}
-
-
-	// Check all list items
-	list_node_t *next = current->next;
-	while ( next != NULL ) {
-		// Clean string
-		next->assembler = strip_comments( next->assembler );
-		next->assembler = trim_spaces( next->assembler );
-
-		// Remove node if empty, otherwise advance one
-		if ( strlen( next->assembler ) < 1 ) {
-			free( next );
-			current->next = current->next->next;
-			next = current->next;
-		} else {
-			current = current->next;
-			next = current->next;
-		}
-	}
+	current->next = NULL;
 }
 
 char *strip_comments( char *string ) {
