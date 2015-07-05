@@ -86,7 +86,7 @@ void character_to_null( char *string, char character ) {
 	char *position;
 
 	// Remove character
-	while( ( position = strchr( string, character ) ) != NULL ) {
+	while ( ( position = strchr( string, character ) ) != NULL ) {
 		*position = '\0';
 	}
 }

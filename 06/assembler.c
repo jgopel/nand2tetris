@@ -26,7 +26,7 @@ int main( void ) {
 
 	// XXX: Debug only
 	list_node_t *current = head;
-	while( current != NULL ) {
+	while ( current != NULL ) {
 		printf( "\n%s", current->assembler );
 		current = current->next;
 	}
@@ -43,7 +43,7 @@ void build_list( list_node_t *current, FILE *fp ) {
 	// Setup variables
 	char *string = read_line( fp );
 
-	while( string != NULL ) {
+	while ( string != NULL ) {
 		// Clean up trailing characters
 		character_to_null( string, '\n' );
 		character_to_null( string, '\r' );
