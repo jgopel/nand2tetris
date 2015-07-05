@@ -32,6 +32,18 @@ int main( void ) {
 	return 0;
 }
 
+/**
+ * Generates a linked list from a file of Hack assembly
+ *
+ * Removes all comment-only and blank lines, generating a linked list with only
+ * lines containing commands. Each line corresponds to a single element of the
+ * list. All machine code values are forced to 0b0 on initization of the list
+ * node. Final node has node->next == NULL.
+ *
+ * @author Jonathan Gopel
+ * @param current Current element of the linked list
+ * @param fp      Assembly file
+ */
 void build_list( list_node_t *current, FILE *fp ) {
 	// Setup variables
 	char *string = read_line( fp );
@@ -50,11 +62,14 @@ void build_list( list_node_t *current, FILE *fp ) {
 			if ( current->assembler == NULL ) {
 				current->assembler = string;
 				current->machine_language = 0b0;
+
 			// Otherwise create node for the string to go into and store it there
 			} else {
+				// Create node
 				current->next = malloc( sizeof( list_node_t ) );
 				current = current->next;
 
+				// Store value in new node
 				current->assembler = string;
 				current->machine_language = 0b0;
 			}
