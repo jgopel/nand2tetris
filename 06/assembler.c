@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include "jg-input.h"
 #include "jg-files.h"
+#include "jg-string.h"
 
 typedef struct list_node {
 	char *assembler;
@@ -12,8 +12,6 @@ typedef struct list_node {
 } list_node_t;
 
 void build_list( list_node_t*, FILE* );
-char *strip_comments( char* );
-char *trim_spaces( char* );
 
 int main( void ) {
 	// TODO: Reenable this
@@ -72,49 +70,4 @@ void build_list( list_node_t *current, FILE *fp ) {
 		string = read_line( fp );
 	}
 	current->next = NULL;
-}
-
-char *strip_comments( char *string ) {
-	// Setup variables
-	const int length = strlen( string );
-
-	// Make sure the string is sufficiently long
-	if ( length < 2 ) {
-		return string;
-	}
-
-	// Iterate through string
-	for ( int i = 0; i < length - 1; i++ ) {
-		// Check current and next character for /
-		if ( string[ i ] == '/' && string[ i + 1 ] == '/' ) {
-			// If both are, make current character the end of the string
-			string[ i ] = '\0';
-			return string;
-		}
-	}
-
-	return string;
-}
-char *trim_spaces( char *string ) {
-	// Mostly from linux kernel
-
-	// Setup variables
-	size_t size;
-	char *end;
-	size = strlen( string );
-
-	if ( ! size )
-		return string;
-
-	end = string + size - 1;
-	while ( end >= string && isspace( *end ) ) {
-		end--;
-	}
-	*( end + 1 ) = '\0';
-
-	while ( *string && isspace( *string ) ) {
-		string++;
-	}
-
-	return string;
 }
