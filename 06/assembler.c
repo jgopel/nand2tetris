@@ -24,13 +24,6 @@ int main( void ) {
 	build_list( head, file_pointer );
 	fclose( file_pointer );
 
-	// XXX: Debug only
-	list_node_t *current = head;
-	while ( current != NULL ) {
-		printf( "\n%s", current->assembler );
-		current = current->next;
-	}
-
 	// Iterate through array and replace array elements with their equivalent machine language code
 
 	// Output array to file
