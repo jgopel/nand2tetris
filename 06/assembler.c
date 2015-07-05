@@ -12,10 +12,8 @@ typedef struct list_node {
 } list_node_t;
 
 void build_list( list_node_t*, FILE* );
-void clean_list( list_node_t** );
 char *strip_comments( char* );
 char *trim_spaces( char* );
-void list_pop( list_node_t** );
 
 int main( void ) {
 	// TODO: Reenable this
@@ -119,16 +117,4 @@ char *trim_spaces( char *string ) {
 	}
 
 	return string;
-}
-
-void list_pop( list_node_t **head ) {
-	// Make current value is not last
-	if ( head == NULL ) {
-		return;
-	}
-
-	// Set head to head->next
-	list_node_t *next = ( *head )->next;
-	free( ( *head ) );
-	( *head ) = next;
 }
