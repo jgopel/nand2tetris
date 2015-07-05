@@ -51,10 +51,6 @@ void build_list( list_node_t *current, FILE *fp ) {
 	char *string = read_line( fp );
 
 	while ( string != NULL ) {
-		// Clean up trailing characters
-		character_to_null( string, '\n' );
-		character_to_null( string, '\r' );
-
 		// Remove comments and strip spaces
 		string = strip_comments( string );
 		string = trim_spaces( string );

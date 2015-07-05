@@ -43,7 +43,9 @@ char *strip_comments( char *string ) {
  * Removes leading and trailing spaces from a string
  *
  * This function is very close to a function from the Linux core. It is
- * transplanted here for the sake of portability.
+ * transplanted here for the sake of portability. Because of the use of
+ * isspace(), this function is capable of trimming elements that are not just
+ * spaces (including tabs and newlines).
  *
  * @author Jonathan Gopel
  * @param  string String to remove spaces from
