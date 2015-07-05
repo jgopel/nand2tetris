@@ -20,7 +20,7 @@ int main( void ) {
 	// TODO: Reenable this
 	// FILE *file_pointer = open_specified_file();
 
-	FILE *file_pointer = fopen( "add/Add.asm", "r" );
+	FILE *file_pointer = fopen( "MaxL-mod.asm", "r" );
 
 	// Split file to linked list
 	list_node_t *head = malloc( sizeof( list_node_t ) );
@@ -41,8 +41,8 @@ int main( void ) {
  *
  * Removes all comment-only and blank lines, generating a linked list with only
  * lines containing commands. Each line corresponds to a single element of the
- * list. All machine code values are forced to 0b0 on initization of the list
- * node. Final node has node->next == NULL.
+ * list. The machine_code variable may contain junk, it must be set
+ * independently. Final node has node->next == NULL.
  *
  * @author Jonathan Gopel
  * @param current Current element of the linked list
@@ -62,7 +62,6 @@ void build_list( list_node_t *head, FILE *fp ) {
 			// Store string in current node if current node is unused (mostly just first instance)
 			if ( current->assembly == NULL ) {
 				current->assembly = string;
-				current->machine_code = 0b0;
 
 			// Otherwise create node for the string to go into and store it there
 			} else {
@@ -72,7 +71,6 @@ void build_list( list_node_t *head, FILE *fp ) {
 
 				// Store value in new node
 				current->assembly = string;
-				current->machine_code = 0b0;
 			}
 		}
 
@@ -102,8 +100,134 @@ void generate_machine_code( list_node_t *head ) {
 }
 
 unsigned int a_instruction( char *assembly ) {
-	return 0;
+	// A Instruction: 0vvv vvvv vvvv vvvv
+
+	// Setup variables
+	unsigned int output = 0b0;
+
+	// Set known bits
+	output |= 0b0 << 15;
+
+	return output;
 }
 unsigned int c_instruction( char *assembly ) {
-	return 0;
+	// C Instruction: 111a cccc ccdd djjj
+
+	// Setup variables
+	unsigned int output = 0b0;
+	char *command = NULL;
+	char *destination = NULL;
+	char *jump = NULL;
+	unsigned int _a = 0b0;
+	unsigned int _command = 0b0;
+	unsigned int _destination = 0b0;
+	unsigned int _jump = 0b0;
+
+	if ( strchr( assembly, ';' ) != NULL ) {
+		command = strtok( assembly, ";" );
+		jump = strtok( NULL, ";" );
+	}
+	if ( strchr( assembly, '=' ) != NULL ) {
+		destination = strtok( assembly, "=" );
+		command = strtok( NULL, "=" );
+	}
+
+	// XXX: Debug only
+	printf( "\n" );
+	printf( "\n Command:     %s", command );
+	printf( "\n Destination: %s", destination );
+	printf( "\n Jump:        %s", jump );
+
+	// Set a (12th) bit
+	char *m_position = strchr( command, 'M' );
+	if ( m_position != NULL ) {
+		_a = 0b1;
+
+		// Replace M with A for command switch
+		*m_position = 'A';
+	}
+
+	// Set command bits
+	if ( strcmp( command, "0" ) == 0 ) {
+		_command = 0b101010;
+	} else if ( strcmp( command, "1" ) == 0 ) {
+		_command = 0b111111;
+	} else if ( strcmp( command, "-1" ) == 0 ) {
+		_command = 0b111010;
+	} else if ( strcmp( command, "D" ) == 0 ) {
+		_command = 0b001100;
+	} else if ( strcmp( command, "A" ) == 0 ) {
+		_command = 0b110000;
+	} else if ( strcmp( command, "!D" ) == 0 ) {
+		_command = 0b001101;
+	} else if ( strcmp( command, "!A" ) == 0 ) {
+		_command = 0b110001;
+	} else if ( strcmp( command, "-D" ) == 0 ) {
+		_command = 0b001111;
+	} else if ( strcmp( command, "-A" ) == 0 ) {
+		_command = 0b110011;
+	} else if ( strcmp( command, "D+1" ) == 0 ) {
+		_command = 0b011111;
+	} else if ( strcmp( command, "A+1" ) == 0 ) {
+		_command = 0b110111;
+	} else if ( strcmp( command, "D-1" ) == 0 ) {
+		_command = 0b001110;
+	} else if ( strcmp( command, "A-1" ) == 0 ) {
+		_command = 0b110010;
+	} else if ( strcmp( command, "D+A" ) == 0 ) {
+		_command = 0b000010;
+	} else if ( strcmp( command, "D-A" ) == 0 ) {
+		_command = 0b010011;
+	} else if ( strcmp( command, "A-D" ) == 0 ) {
+		_command = 0b000111;
+	} else if ( strcmp( command, "D&A" ) == 0 ) {
+		_command = 0b000000;
+	} else if ( strcmp( command, "D|A" ) == 0 ) {
+		_command = 0b010101;
+	} else {
+		_command = 0b101010;
+	}
+
+	// Set destination bits
+	if ( destination != NULL ) {
+		if ( strchr( destination, 'A' ) != NULL ) {
+			_destination |= 1 << 2;
+		}
+		if ( strchr( destination, 'D' ) != NULL ) {
+			_destination |= 1 << 1;
+		}
+		if ( strchr( destination, 'M' ) != NULL ) {
+			_destination |= 1 << 0;
+		}
+	}
+
+	// Set jump bits
+	if ( jump != NULL ) {
+		if ( strcmp( jump, "JGT" ) == 0 ) {
+			_jump = 0b001;
+		} else if ( strcmp( jump, "JEQ" ) == 0 ) {
+			_jump = 0b010;
+		} else if ( strcmp( jump, "JGE" ) == 0 ) {
+			_jump = 0b011;
+		} else if ( strcmp( jump, "JLT" ) == 0 ) {
+			_jump = 0b100;
+		} else if ( strcmp( jump, "JNE" ) == 0 ) {
+			_jump = 0b101;
+		} else if ( strcmp( jump, "JLE" ) == 0 ) {
+			_jump = 0b110;
+		} else if ( strcmp( jump, "JMP" ) == 0 ) {
+			_jump = 0b111;
+		} else {
+			_jump = 0b000;
+		}
+	}
+
+	// Build output string
+	output |= 0b111 << 13;
+	output |= _a << 12;
+	output |= _command << 6;
+	output |= _destination << 3;
+	output |= _jump << 0;
+
+	return output;
 }
