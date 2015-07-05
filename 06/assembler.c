@@ -12,6 +12,7 @@ typedef struct list_node {
 } list_node_t;
 
 void build_list( list_node_t*, FILE* );
+void generate_machine_language( list_node_t* );
 
 int main( void ) {
 	// TODO: Reenable this
@@ -25,6 +26,7 @@ int main( void ) {
 	fclose( file_pointer );
 
 	// Iterate through array and replace array elements with their equivalent machine language code
+	generate_machine_language( head );
 
 	// Output array to file
 
@@ -78,4 +80,9 @@ void build_list( list_node_t *current, FILE *fp ) {
 		string = read_line( fp );
 	}
 	current->next = NULL;
+}
+
+void generate_machine_language( list_node_t *current ) {
+	// A Instruction: 0vvv vvvv vvvv vvvv
+	// C Instruction: 111a cccc ccdd djjj
 }
