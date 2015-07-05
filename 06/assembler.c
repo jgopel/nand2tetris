@@ -12,9 +12,10 @@ typedef struct list_node {
 } list_node_t;
 
 void build_list( list_node_t*, FILE* );
-void clean_list( list_node_t* );
+void clean_list( list_node_t** );
 char *strip_comments( char* );
 char *trim_spaces( char* );
+void list_pop( list_node_t** );
 
 int main( void ) {
 	// TODO: Reenable this
@@ -23,12 +24,19 @@ int main( void ) {
 	FILE *file_pointer = fopen( "add/Add.asm", "r" );
 
 	// Split file to linked list
-	list_node_t *head = malloc( sizeof( list_node_t ) );
+	list_node_t *head = calloc( 1, sizeof( list_node_t ) );
 	build_list( head, file_pointer );
 	fclose( file_pointer );
 
+	// XXX: Debug only
+	list_node_t *current = head;
+	while( current != NULL ) {
+		printf( "\n%s", current->assembler );
+		current = current->next;
+	}
+
 	// Remove blank lines and comments
-	clean_list( head );
+	clean_list( &head );
 
 	// Iterate through array and replace array elements with their equivalent machine language code
 
@@ -48,14 +56,16 @@ void build_list( list_node_t *current, FILE *fp ) {
 		character_to_null( string, '\n' );
 		character_to_null( string, '\r' );
 
-		// Store string
+		// Setup node
 		current->assembler = string;
+		current->machine_language = 0b0;
 
 		// Setup for next iteration
 		string = read_line( fp );
 
 		// Check for termination conditions
 		if ( string == NULL ) {
+			current->next = NULL;
 			break;
 		} else {
 			current->next = malloc( sizeof( list_node_t ) );
@@ -64,21 +74,55 @@ void build_list( list_node_t *current, FILE *fp ) {
 	}
 }
 
-void clean_list( list_node_t *current ) {
-	// char *string = "   I should remain //I should go";
+void clean_list( list_node_t **head ) {
+	// Setup variables
+	list_node_t *current = *head;
 
-	printf( "\n1: %s::", current->assembler );
+	// Get a valid first item to work with
+	while( current == *head ) {
+		// Clean string
+		current->assembler = strip_comments( current->assembler );
+		current->assembler = trim_spaces( current->assembler );
 
-	current->assembler = strip_comments( current->assembler );
-	printf( "\n2: %s::", current->assembler );
+		if( strlen( current->assembler ) < 1 ) {
+			list_pop( head );
+			current = *head;
+		} else {
+			current = current->next;
+		}
+	}
 
-	current->assembler = trim_spaces( current->assembler );
-	printf( "\n3: %s::", current->assembler );
+
+	// Check all list items
+	list_node_t *next = current->next;
+	while ( next != NULL ) {
+		// Clean string
+		next->assembler = strip_comments( next->assembler );
+		next->assembler = trim_spaces( next->assembler );
+
+		// Remove node if empty, otherwise advance one
+		if ( strlen( next->assembler ) < 1 ) {
+			free( next );
+			current->next = current->next->next;
+			next = current->next;
+		} else {
+			current = current->next;
+			next = current->next;
+		}
+	}
 }
 
 char *strip_comments( char *string ) {
+	// Setup variables
+	const int length = strlen( string );
+
+	// Make sure the string is sufficiently long
+	if ( length < 2 ) {
+		return string;
+	}
+
 	// Iterate through string
-	for ( int i = 0; i < strlen( string ) - 1; i++ ) {
+	for ( int i = 0; i < length - 1; i++ ) {
 		// Check current and next character for /
 		if ( string[ i ] == '/' && string[ i + 1 ] == '/' ) {
 			// If both are, make current character the end of the string
@@ -111,4 +155,16 @@ char *trim_spaces( char *string ) {
 	}
 
 	return string;
+}
+
+void list_pop( list_node_t **head ) {
+	// Make current value is not last
+	if ( head == NULL ) {
+		return;
+	}
+
+	// Set head to head->next
+	list_node_t *next = ( *head )->next;
+	free( ( *head ) );
+	( *head ) = next;
 }
