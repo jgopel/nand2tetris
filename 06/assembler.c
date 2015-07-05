@@ -6,13 +6,15 @@
 #include "jg-string.h"
 
 typedef struct list_node {
-	char *assembler;
-	unsigned int machine_language;
+	char *assembly;
+	unsigned int machine_code;
 	struct list_node *next;
 } list_node_t;
 
 void build_list( list_node_t*, FILE* );
-void generate_machine_language( list_node_t* );
+void generate_machine_code( list_node_t* );
+unsigned int a_instruction( char* );
+unsigned int c_instruction( char* );
 
 int main( void ) {
 	// TODO: Reenable this
@@ -26,7 +28,7 @@ int main( void ) {
 	fclose( file_pointer );
 
 	// Iterate through array and replace array elements with their equivalent machine language code
-	generate_machine_language( head );
+	generate_machine_code( head );
 
 	// Output array to file
 
@@ -58,9 +60,9 @@ void build_list( list_node_t *head, FILE *fp ) {
 
 		if ( strlen( string ) > 1 ) {
 			// Store string in current node if current node is unused (mostly just first instance)
-			if ( current->assembler == NULL ) {
-				current->assembler = string;
-				current->machine_language = 0b0;
+			if ( current->assembly == NULL ) {
+				current->assembly = string;
+				current->machine_code = 0b0;
 
 			// Otherwise create node for the string to go into and store it there
 			} else {
@@ -69,8 +71,8 @@ void build_list( list_node_t *head, FILE *fp ) {
 				current = current->next;
 
 				// Store value in new node
-				current->assembler = string;
-				current->machine_language = 0b0;
+				current->assembly = string;
+				current->machine_code = 0b0;
 			}
 		}
 
@@ -79,9 +81,29 @@ void build_list( list_node_t *head, FILE *fp ) {
 	current->next = NULL;
 }
 
-void generate_machine_language( list_node_t *current ) {
+void generate_machine_code( list_node_t *head ) {
 	// A Instruction: 0vvv vvvv vvvv vvvv
 	// C Instruction: 111a cccc ccdd djjj
 
+	// Setup variables
+	list_node_t *current = head;
 
+	// Iterate through all nodes
+	while( current != NULL ) {
+		if( current->assembly[ 0 ] == '@' ) {
+			current->machine_code = a_instruction( current->assembly );
+		} else {
+			current->machine_code = c_instruction( current->assembly );
+		}
+
+		// Setup for next iteration
+		current = current->next;
+	}
+}
+
+unsigned int a_instruction( char *assembly ) {
+	return 0;
+}
+unsigned int c_instruction( char *assembly ) {
+	return 0;
 }
