@@ -309,4 +309,19 @@ unsigned int c_instruction( char *assembly ) {
 void generate_file( list_node_t *head, FILE *fp ) {
 	// Setup variables
 	list_node_t *current = head;
+	char string[ 16 ];
+
+	while ( current != NULL ) {
+		int_to_binary_string( current->machine_code, string, 16 );
+
+		// Prevent leading or trailing newline
+		if( current == head ) {
+			fprintf( fp, "%s", string );
+		} else {
+			fprintf( fp, "\n%s", string );
+		}
+
+		// Go to next node
+		current = current->next;
+	}
 }
