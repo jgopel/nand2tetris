@@ -37,7 +37,7 @@ int main( void ) {
 }
 
 /**
- * Generates a linked list from a file of Hack assembly
+ * Creates a linked list from a file of Hack assembly
  *
  * Removes all comment-only and blank lines, generating a linked list with only
  * lines containing commands. Each line corresponds to a single element of the
@@ -79,6 +79,12 @@ void build_list( list_node_t *head, FILE *fp ) {
 	current->next = NULL;
 }
 
+/**
+ * Generates machine code for an entire linked list
+ *
+ * @author Jonathan Gopel
+ * @param head First node of the linked list
+ */
 void generate_machine_code( list_node_t *head ) {
 	// A Instruction: 0vvv vvvv vvvv vvvv
 	// C Instruction: 111a cccc ccdd djjj
@@ -99,6 +105,13 @@ void generate_machine_code( list_node_t *head ) {
 	}
 }
 
+/**
+ * Generates machine code for the A instruction
+ *
+ * @author Jonathan Gopel
+ * @param  assembly String to turn into machine code
+ * @return          Machine code
+ */
 unsigned int a_instruction( char *assembly ) {
 	// A Instruction: 0vvv vvvv vvvv vvvv
 
@@ -110,6 +123,14 @@ unsigned int a_instruction( char *assembly ) {
 
 	return output;
 }
+
+/**
+ * Generates machine code for the C instruction
+ *
+ * @author Jonathan Gopel
+ * @param  assembly String to turn into machine code
+ * @return          Machine code
+ */
 unsigned int c_instruction( char *assembly ) {
 	// C Instruction: 111a cccc ccdd djjj
 
