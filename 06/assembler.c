@@ -18,26 +18,35 @@ unsigned int c_instruction( char* );
 
 int main( int argc, char *argv[] ) {
 	// Setup variables
-	char *input_filename;
+	char *filename;
+	char default_file[] = "test.asm";
 
 	// Set file name
 	if ( argc < 2 ) {
-		input_filename = "test.asm";
+		// Add one for \0 character
+		filename = malloc( strlen( default_file ) + 1 );
+		strcpy( filename, default_file );
 	} else {
-		input_filename = argv[ 1 ];
+		// Add one for \0 character
+		filename = malloc( strlen( argv[ 1 ] + 1 ) );
+		strcpy( filename, argv[ 1 ] );
 	}
 
 	// Open file
-	FILE *file_pointer = fopen( input_filename, "r" );
-	if ( file_pointer == NULL && strstr( input_filename, ".asm" ) == NULL ) {
-		strcat( input_filename, ".asm" );
-		file_pointer = fopen( input_filename, "r" );
+	FILE *file_pointer = fopen( filename, "r" );
+	if ( file_pointer == NULL && strstr( filename, ".asm" ) == NULL ) {
+		// Lengthen string for concatenation
+		filename = (char*) realloc( filename, strlen( filename ) + 5 );
+		strcat( filename, ".asm" );
+
+		// Retry fopen
+		file_pointer = fopen( filename, "r" );
 	}
 
 	// Check that a file was opened
 	if ( file_pointer == NULL ) {
 		// File could not be opened
-		printf( "\n%s does not exist.", input_filename );
+		printf( "\n%s does not exist.", filename );
 		return 1;
 	}
 
@@ -49,7 +58,15 @@ int main( int argc, char *argv[] ) {
 	// Iterate through list and generate machine language nodes
 	generate_machine_code( head );
 
-	// Output machine language to file
+	// Remove .asm extension if it exists
+	char *dot_location = strrchr( filename, '.' );
+	if ( dot_location != NULL ) {
+		*dot_location = '\0';
+	}
+
+	// Add .hack extension
+	filename = realloc( filename, strlen( filename ) + 6 );
+	filename = strcat( filename, ".hack" );
 
 	// Normal exit
 	return 0;
@@ -112,8 +129,8 @@ void generate_machine_code( list_node_t *head ) {
 	list_node_t *current = head;
 
 	// Iterate through all nodes
-	while( current != NULL ) {
-		if( current->assembly[ 0 ] == '@' ) {
+	while ( current != NULL ) {
+		if ( current->assembly[ 0 ] == '@' ) {
 			current->machine_code = a_instruction( current->assembly );
 		} else {
 			current->machine_code = c_instruction( current->assembly );
