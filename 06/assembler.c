@@ -72,7 +72,7 @@ int main( int argc, char *argv[] ) {
 	// Create file for output
 	file_pointer = fopen( filename, "w" );
 	if ( file_pointer == NULL ) {
-		printf( "%s could not be created", filename );
+		printf( "\n%s could not be created", filename );
 	}
 	free( filename );
 
