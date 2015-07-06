@@ -15,6 +15,7 @@ void build_list( list_node_t*, FILE* );
 void generate_machine_code( list_node_t* );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
+void generate_file( list_node_t*, FILE* );
 
 int main( int argc, char *argv[] ) {
 	// Setup variables
@@ -47,7 +48,7 @@ int main( int argc, char *argv[] ) {
 	if ( file_pointer == NULL ) {
 		// File could not be opened
 		printf( "\n%s does not exist.", filename );
-		return 1;
+		return 0;
 	}
 
 	// Split file to linked list
@@ -67,6 +68,19 @@ int main( int argc, char *argv[] ) {
 	// Add .hack extension
 	filename = realloc( filename, strlen( filename ) + 6 );
 	filename = strcat( filename, ".hack" );
+
+	// Create file for output
+	file_pointer = fopen( filename, "w" );
+	if ( file_pointer == NULL ) {
+		printf( "%s could not be created", filename );
+	}
+	free( filename );
+
+	// Output to file
+	generate_file( head, file_pointer );
+
+	// Close file
+	fclose( file_pointer );
 
 	// Normal exit
 	return 0;
@@ -290,4 +304,9 @@ unsigned int c_instruction( char *assembly ) {
 	output |= _jump << 0;
 
 	return output;
+}
+
+void generate_file( list_node_t *head, FILE *fp ) {
+	// Setup variables
+	list_node_t *current = head;
 }
