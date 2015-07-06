@@ -16,11 +16,30 @@ void generate_machine_code( list_node_t* );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
 
-int main( void ) {
-	// TODO: Reenable this
-	// FILE *file_pointer = open_specified_file();
+int main( int argc, char *argv[] ) {
+	// Setup variables
+	char *filename;
 
-	FILE *file_pointer = fopen( "MaxL-mod.asm", "r" );
+	// Set file name
+	if ( argc < 2 ) {
+		filename = "test.asm";
+	} else {
+		filename = argv[ 1 ];
+	}
+
+	// Open file
+	FILE *file_pointer = fopen( filename, "r" );
+	if ( file_pointer == NULL && strstr( filename, ".asm" ) == NULL ) {
+		strcat( filename, ".asm" );
+		file_pointer = fopen( filename, "r" );
+	}
+
+	// Check that a file was opened
+	if ( file_pointer == NULL ) {
+		// File could not be opened
+		printf( "\n%s does not exist.", filename );
+		return 1;
+	}
 
 	// Split file to linked list
 	list_node_t *head = malloc( sizeof( list_node_t ) );
