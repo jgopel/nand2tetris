@@ -63,12 +63,12 @@ char *trim_spaces( char *string ) {
 		return string;
 
 	end = string + size - 1;
-	while ( end >= string && isspace( *end ) ) {
+	while ( end >= string && isspace( (unsigned char) *end ) ) {
 		end--;
 	}
 	*( end + 1 ) = '\0';
 
-	while ( *string && isspace( *string ) ) {
+	while ( *string && isspace( (unsigned char) *string ) ) {
 		string++;
 	}
 
