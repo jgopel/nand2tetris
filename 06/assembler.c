@@ -118,8 +118,17 @@ unsigned int a_instruction( char *assembly ) {
 	// Setup variables
 	unsigned int output = 0b0;
 
-	// Set known bits
+	// Remove leading @
+	if ( assembly[0] == '@' ) {
+		assembly++;
+	}
+
+	// Convert string to int
+	unsigned int _assembly = (unsigned int) strtol( assembly, NULL, 10 );
+
+	// Set output bits
 	output |= 0b0 << 15;
+	output |= _assembly << 0;
 
 	return output;
 }
