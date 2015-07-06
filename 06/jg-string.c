@@ -1,5 +1,6 @@
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 #include "jg-string.h"
 
 /**
@@ -73,4 +74,40 @@ char *trim_spaces( char *string ) {
 	}
 
 	return string;
+}
+
+/**
+ * Turns an integer into a binary string
+ *
+ * Number of bits should be equal to the size of output.
+ *
+ * @author Jonathan Gopel
+ * @param input          Integer
+ * @param output         String to store binary in
+ * @param number_of_bits Number of leading 0s to use
+ */
+void int_to_binary_string( unsigned int input, char* output, int number_of_bits ) {
+	// Setup variables
+	int value;
+	int element;
+
+	// Make sure value will fit in output
+	if ( input >= pow( 2, number_of_bits ) ) {
+		return;
+	}
+
+	// Set null terminator
+	output[ number_of_bits ] = '\0';
+
+	// Iterate through number
+	for ( int i = ( number_of_bits - 1 ); i >= 0; --i ) {
+		// Set value for current iteration
+		value = input >> i;
+
+		// Calculate array element to change
+		element = number_of_bits - i - 1;
+
+		// Add value to array
+		output[ element ] = ( value & 1 ) + '0';
+	}
 }
