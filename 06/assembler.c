@@ -37,7 +37,7 @@ int main( int argc, char *argv[] ) {
 	FILE *file_pointer = fopen( filename, "r" );
 	if ( file_pointer == NULL && strstr( filename, ".asm" ) == NULL ) {
 		// Lengthen string for concatenation
-		filename = (char*) realloc( filename, strlen( filename ) + 5 );
+		filename = realloc( filename, strlen( filename ) + 5 );
 		strcat( filename, ".asm" );
 
 		// Retry fopen
