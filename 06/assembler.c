@@ -306,6 +306,13 @@ unsigned int c_instruction( char *assembly ) {
 	return output;
 }
 
+/**
+ * Outputs machine code to given file
+ *
+ * @author Jonathan Gopel
+ * @param head First element of the linked list
+ * @param fp   Pointer to the output file
+ */
 void generate_file( list_node_t *head, FILE *fp ) {
 	// Setup variables
 	list_node_t *current = head;
