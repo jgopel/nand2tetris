@@ -27,10 +27,10 @@ int main( void ) {
 	build_list( head, file_pointer );
 	fclose( file_pointer );
 
-	// Iterate through array and replace array elements with their equivalent machine language code
+	// Iterate through list and generate machine language nodes
 	generate_machine_code( head );
 
-	// Output array to file
+	// Output machine language to file
 
 	// Normal exit
 	return 0;
