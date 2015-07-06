@@ -18,26 +18,26 @@ unsigned int c_instruction( char* );
 
 int main( int argc, char *argv[] ) {
 	// Setup variables
-	char *filename;
+	char *input_filename;
 
 	// Set file name
 	if ( argc < 2 ) {
-		filename = "test.asm";
+		input_filename = "test.asm";
 	} else {
-		filename = argv[ 1 ];
+		input_filename = argv[ 1 ];
 	}
 
 	// Open file
-	FILE *file_pointer = fopen( filename, "r" );
-	if ( file_pointer == NULL && strstr( filename, ".asm" ) == NULL ) {
-		strcat( filename, ".asm" );
-		file_pointer = fopen( filename, "r" );
+	FILE *file_pointer = fopen( input_filename, "r" );
+	if ( file_pointer == NULL && strstr( input_filename, ".asm" ) == NULL ) {
+		strcat( input_filename, ".asm" );
+		file_pointer = fopen( input_filename, "r" );
 	}
 
 	// Check that a file was opened
 	if ( file_pointer == NULL ) {
 		// File could not be opened
-		printf( "\n%s does not exist.", filename );
+		printf( "\n%s does not exist.", input_filename );
 		return 1;
 	}
 
