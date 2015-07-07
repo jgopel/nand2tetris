@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "jg-input.h"
-#include "jg-files.h"
 #include "jg-string.h"
 
 typedef struct list_node {
