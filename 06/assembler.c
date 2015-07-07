@@ -11,7 +11,6 @@ typedef struct list_node {
 } list_node_t;
 
 void build_list( list_node_t*, FILE* );
-void generate_machine_code( list_node_t* );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
 void generate_file( list_node_t*, FILE* );
@@ -74,8 +73,6 @@ int main( int argc, char *argv[] ) {
 
 	// Output to file
 	generate_file( head, file_pointer );
-
-	// Close file
 	fclose( file_pointer );
 
 	// Normal exit
