@@ -11,9 +11,9 @@ typedef struct list_node {
 } list_node_t;
 
 void build_list( list_node_t*, FILE* );
+void generate_file( list_node_t*, FILE* );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
-void generate_file( list_node_t*, FILE* );
 
 int main( int argc, char *argv[] ) {
 	// Setup variables
@@ -125,6 +125,33 @@ void build_list( list_node_t *head, FILE *fp ) {
 		string = read_line( fp );
 	}
 	current->next = NULL;
+}
+
+/**
+ * Outputs machine code to given file
+ *
+ * @author Jonathan Gopel
+ * @param head First element of the linked list
+ * @param fp   Pointer to the output file
+ */
+void generate_file( list_node_t *head, FILE *fp ) {
+	// Setup variables
+	list_node_t *current = head;
+	char string[ 16 ];
+
+	while ( current != NULL ) {
+		int_to_binary_string( current->machine_code, string, 16 );
+
+		// Prevent leading or trailing newline
+		if ( current == head ) {
+			fprintf( fp, "%s", string );
+		} else {
+			fprintf( fp, "\n%s", string );
+		}
+
+		// Go to next node
+		current = current->next;
+	}
 }
 
 /**
@@ -276,31 +303,4 @@ unsigned int c_instruction( char *assembly ) {
 	output |= _jump << 0;
 
 	return output;
-}
-
-/**
- * Outputs machine code to given file
- *
- * @author Jonathan Gopel
- * @param head First element of the linked list
- * @param fp   Pointer to the output file
- */
-void generate_file( list_node_t *head, FILE *fp ) {
-	// Setup variables
-	list_node_t *current = head;
-	char string[ 16 ];
-
-	while ( current != NULL ) {
-		int_to_binary_string( current->machine_code, string, 16 );
-
-		// Prevent leading or trailing newline
-		if( current == head ) {
-			fprintf( fp, "%s", string );
-		} else {
-			fprintf( fp, "\n%s", string );
-		}
-
-		// Go to next node
-		current = current->next;
-	}
 }
