@@ -11,6 +11,7 @@ typedef struct list_node {
 } list_node_t;
 
 void build_list( list_node_t*, FILE* );
+void output_list( list_node_t*, FILE* );
 void generate_file( list_node_t*, FILE* );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
@@ -49,7 +50,7 @@ int main( int argc, char *argv[] ) {
 		return 0;
 	}
 
-	// Split file to linked list
+	// Build linked list and symbol table
 	list_node_t *head = malloc( sizeof( list_node_t ) );
 	build_list( head, file_pointer );
 	fclose( file_pointer );
@@ -72,40 +73,36 @@ int main( int argc, char *argv[] ) {
 	free( filename );
 
 	// Output to file
-	generate_file( head, file_pointer );
+	output_list( head, file_pointer );
 	fclose( file_pointer );
 
 	// Normal exit
 	return 0;
 }
 
-/**
- * Creates a linked list from a file of Hack assembly
- *
- * Removes all comment-only and blank lines, generating a linked list with only
- * lines containing commands. Each line corresponds to a single element of the
- * list. The machine_code variable is set. Final node has node->next == NULL.
- *
- * @author Jonathan Gopel
- * @param current Current element of the linked list
- * @param fp      Assembly file
- */
 void build_list( list_node_t *head, FILE *fp ) {
 	// Setup variables
 	list_node_t *current = head;
 	char *string = read_line( fp );
+	unsigned int line = 0;
 
 	while ( string != NULL ) {
-		// Remove comments and strip spaces
+		// Data sanitization
 		string = strip_comments( string );
 		string = trim_spaces( string );
 
-		if ( strlen( string ) > 1 ) {
-			// Store string in current node if current node is unused (mostly just first instance)
+		if ( string[ 0 ] == '(' ) {
+			// Handle jump locations
+		} else if ( strlen( string ) > 1 ) {
+			// Check for memory alias
+			if ( string[ 0 ] == '@' ) {
+			}
+
+			// Check if current node is empty
 			if ( current->assembly == NULL ) {
 				current->assembly = string;
 
-			// Otherwise create node for the string to go into and store it there
+			// Create new node if needed
 			} else {
 				// Create node
 				current->next = malloc( sizeof( list_node_t ) );
@@ -115,31 +112,30 @@ void build_list( list_node_t *head, FILE *fp ) {
 				current->assembly = string;
 			}
 
-			if ( current->assembly[ 0 ] == '@' ) {
-				current->machine_code = a_instruction( current->assembly );
-			} else {
-				current->machine_code = c_instruction( current->assembly );
-			}
+			line++;
 		}
 
+		// Get next chunk
 		string = read_line( fp );
 	}
+
+	// Ensure final next is set null
 	current->next = NULL;
 }
 
-/**
- * Outputs machine code to given file
- *
- * @author Jonathan Gopel
- * @param head First element of the linked list
- * @param fp   Pointer to the output file
- */
-void generate_file( list_node_t *head, FILE *fp ) {
+void output_list( list_node_t *head, FILE *fp ) {
 	// Setup variables
 	list_node_t *current = head;
 	char string[ 16 ];
 
 	while ( current != NULL ) {
+		if ( current->assembly[ 0 ] == '@' ) {
+			current->machine_code = a_instruction( current->assembly );
+		} else {
+			current->machine_code = c_instruction( current->assembly );
+		}
+
+		// Generate binary
 		int_to_binary_string( current->machine_code, string, 16 );
 
 		// Prevent leading or trailing newline
@@ -168,7 +164,7 @@ unsigned int a_instruction( char *assembly ) {
 	unsigned int output = 0b0;
 
 	// Remove leading @
-	if ( assembly[0] == '@' ) {
+	if ( assembly[ 0 ] == '@' ) {
 		assembly++;
 	}
 
