@@ -87,8 +87,7 @@ int main( int argc, char *argv[] ) {
  *
  * Removes all comment-only and blank lines, generating a linked list with only
  * lines containing commands. Each line corresponds to a single element of the
- * list. The machine_code variable may contain junk, it must be set
- * independently. Final node has node->next == NULL.
+ * list. The machine_code variable is set. Final node has node->next == NULL.
  *
  * @author Jonathan Gopel
  * @param current Current element of the linked list
