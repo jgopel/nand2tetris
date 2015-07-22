@@ -4,15 +4,15 @@
 #include "jg-input.h"
 #include "jg-string.h"
 
-typedef struct list_node {
+typedef struct asm_node {
 	char *assembly;
 	unsigned int machine_code;
-	struct list_node *next;
-} list_node_t;
+	struct asm_node *next;
+} asm_node_t;
 
-void build_list( list_node_t*, FILE* );
-void output_list( list_node_t*, FILE* );
-void generate_file( list_node_t*, FILE* );
+void build_list( asm_node_t*, FILE* );
+void output_list( asm_node_t*, FILE* );
+void generate_file( asm_node_t*, FILE* );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
 
@@ -51,7 +51,7 @@ int main( int argc, char *argv[] ) {
 	}
 
 	// Build linked list and symbol table
-	list_node_t *head = malloc( sizeof( list_node_t ) );
+	asm_node_t *head = malloc( sizeof( asm_node_t ) );
 	build_list( head, file_pointer );
 	fclose( file_pointer );
 
@@ -80,9 +80,9 @@ int main( int argc, char *argv[] ) {
 	return 0;
 }
 
-void build_list( list_node_t *head, FILE *fp ) {
+void build_list( asm_node_t *head, FILE *fp ) {
 	// Setup variables
-	list_node_t *current = head;
+	asm_node_t *current = head;
 	char *string = read_line( fp );
 	unsigned int line = 0;
 
@@ -96,6 +96,7 @@ void build_list( list_node_t *head, FILE *fp ) {
 		} else if ( strlen( string ) > 1 ) {
 			// Check for memory alias
 			if ( string[ 0 ] == '@' ) {
+				// TODO: Detect @Rx @anything @SCREEN @ KBD
 			}
 
 			// Check if current node is empty
@@ -104,8 +105,8 @@ void build_list( list_node_t *head, FILE *fp ) {
 
 			// Create new node if needed
 			} else {
-				// Create node
-				current->next = malloc( sizeof( list_node_t ) );
+				// Create and select node
+				current->next = malloc( sizeof( asm_node_t ) );
 				current = current->next;
 
 				// Store value in new node
@@ -123,9 +124,9 @@ void build_list( list_node_t *head, FILE *fp ) {
 	current->next = NULL;
 }
 
-void output_list( list_node_t *head, FILE *fp ) {
+void output_list( asm_node_t *head, FILE *fp ) {
 	// Setup variables
-	list_node_t *current = head;
+	asm_node_t *current = head;
 	char string[ 16 ];
 
 	while ( current != NULL ) {
