@@ -30,7 +30,7 @@ release: $(TARGET)
 $(TARGET): $(OBJECTS)
 	@echo
 	@echo " Linking..."
-	$(CC) $(CFLAGS) -o $(EXEDIR)/$@ $^
+	$(CC) $(CFLAGS) -o $(EXEDIR)/$@ $^ -lm
 
 $(OBJDIR)/%.o: %.c %.d
 	@echo
