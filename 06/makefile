@@ -20,7 +20,7 @@ debug: $(TARGET)
 Og: CFLAGS += -Og
 Og: debug
 
-pedantic: CFLAGS += -Wextra -pedantic -Werror
+pedantic: CFLAGS += -Wextra -pedantic
 pedantic: debug
 
 release: CFLAGS += -O3
