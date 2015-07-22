@@ -12,14 +12,15 @@ typedef struct asm_node {
 typedef struct sym_node {
 	char *symbol;
 	int memory_location;
+	char offset;
 	struct sym_node *next;
 } sym_node_t;
 
-void build_sym_list( sym_node_t* );
-void build_list( asm_node_t*, FILE* );
+unsigned int build_lists( asm_node_t*, sym_node_t*, FILE* );
 void output_list( asm_node_t*, FILE* );
 void generate_file( asm_node_t*, FILE* );
-void add_to_sym_list( sym_node_t*, char*, int );
+void add_defaults( sym_node_t* );
+int add_to_sym_list( sym_node_t*, char*, int, char );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
 
@@ -58,10 +59,9 @@ int main( int argc, char *argv[] ) {
 	}
 
 	// Build linked list and symbol table
-	asm_node_t *asm_head = malloc( sizeof( asm_node_t ) );
-	sym_node_t *sym_head = malloc( sizeof( sym_node_t ) );
-	build_sym_list( sym_head );
-	build_list( asm_head, file_pointer );
+	asm_node_t *asm_head = calloc( 1, sizeof( asm_node_t ) );
+	sym_node_t *sym_head = calloc( 1, sizeof( sym_node_t ) );
+	build_lists( asm_head, sym_head, file_pointer );
 	fclose( file_pointer );
 
 	// Remove .asm extension if it exists
@@ -89,54 +89,50 @@ int main( int argc, char *argv[] ) {
 	return 0;
 }
 
-void build_sym_list( sym_node_t *head ) {
-	// Registers
-	add_to_sym_list( head, "R0", 0 );
-	add_to_sym_list( head, "R1", 1 );
-	add_to_sym_list( head, "R2", 2 );
-	add_to_sym_list( head, "R3", 3 );
-	add_to_sym_list( head, "R4", 4 );
-	add_to_sym_list( head, "R5", 5 );
-	add_to_sym_list( head, "R6", 6 );
-	add_to_sym_list( head, "R7", 7 );
-	add_to_sym_list( head, "R8", 8 );
-	add_to_sym_list( head, "R9", 9 );
-	add_to_sym_list( head, "R10", 10 );
-	add_to_sym_list( head, "R11", 11 );
-	add_to_sym_list( head, "R12", 12 );
-	add_to_sym_list( head, "R13", 13 );
-	add_to_sym_list( head, "R14", 14 );
-	add_to_sym_list( head, "R15", 15 );
-
-	// Keywords
-	add_to_sym_list( head, "SP", 0 );
-	add_to_sym_list( head, "LCL", 1 );
-	add_to_sym_list( head, "ARG", 2 );
-	add_to_sym_list( head, "THIS", 3 );
-	add_to_sym_list( head, "THAT", 4 );
-
-	// Memory maps
-	add_to_sym_list( head, "SCREEN", 0x4000 );
-	add_to_sym_list( head, "KBD", 0x6000 );
-}
-
-void build_list( asm_node_t *head, FILE *fp ) {
+unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	// Setup variables
 	asm_node_t *current = head;
 	char *string = read_line( fp );
+	char *symbol;
 	unsigned int line = 0;
+	unsigned int sym_count = 0;
+	add_defaults( sym_head );
 
 	while ( string != NULL ) {
 		// Data sanitization
 		string = strip_comments( string );
 		string = trim_spaces( string );
 
+		// Handle jumps
 		if ( string[ 0 ] == '(' ) {
-			// Handle jump locations
+			// Resize symbol
+			realloc( symbol, strlen( string ) + 1 );
+			strcpy( symbol, string );
+
+			// Remove parens
+			symbol++;
+			if ( symbol[ strlen( symbol ) - 1 ] == ')' ) {
+				symbol[ strlen( symbol ) - 1 ] = '\0';
+			}
+
+			// Add to sym table
+			add_to_sym_list( sym_head, symbol, line, 0 );
+
+		// Everything that's not a jump
 		} else if ( strlen( string ) > 1 ) {
 			// Check for memory alias
 			if ( string[ 0 ] == '@' ) {
-				// TODO: Detect @Rx @anything @SCREEN @ KBD
+				// Resize symbol to hold string
+				realloc( symbol, strlen( string ) + 1 );
+				strcpy( symbol, string );
+
+				// Remove @
+				symbol++;
+
+				int update = add_to_sym_list( sym_head, symbol, sym_count, 1 );
+				if ( update == 0 ) {
+					sym_count++;
+				}
 			}
 
 			// Check if current node is empty
@@ -162,6 +158,8 @@ void build_list( asm_node_t *head, FILE *fp ) {
 
 	// Ensure final next is set null
 	current->next = NULL;
+
+	return sym_count;
 }
 
 void output_list( asm_node_t *head, FILE *fp ) {
@@ -191,21 +189,62 @@ void output_list( asm_node_t *head, FILE *fp ) {
 	}
 }
 
-void add_to_sym_list( sym_node_t *head, char *string, int value ) {
-	sym_node_t *current = head;
+void add_defaults( sym_node_t *head ) {
+	// Setup default values
+	// Registers
+	add_to_sym_list( head, "R0", 0, 0 );
+	add_to_sym_list( head, "R1", 1, 0 );
+	add_to_sym_list( head, "R2", 2, 0 );
+	add_to_sym_list( head, "R3", 3, 0 );
+	add_to_sym_list( head, "R4", 4, 0 );
+	add_to_sym_list( head, "R5", 5, 0 );
+	add_to_sym_list( head, "R6", 6, 0 );
+	add_to_sym_list( head, "R7", 7, 0 );
+	add_to_sym_list( head, "R8", 8, 0 );
+	add_to_sym_list( head, "R9", 9, 0 );
+	add_to_sym_list( head, "R10", 10, 0 );
+	add_to_sym_list( head, "R11", 11, 0 );
+	add_to_sym_list( head, "R12", 12, 0 );
+	add_to_sym_list( head, "R13", 13, 0 );
+	add_to_sym_list( head, "R14", 14, 0 );
+	add_to_sym_list( head, "R15", 15, 0 );
+	// Keywords
+	add_to_sym_list( head, "SP", 0, 0 );
+	add_to_sym_list( head, "LCL", 1, 0 );
+	add_to_sym_list( head, "ARG", 2, 0 );
+	add_to_sym_list( head, "THIS", 3, 0 );
+	add_to_sym_list( head, "THAT", 4, 0 );
+	// Memory maps
+	add_to_sym_list( head, "SCREEN", 0x4000, 0 );
+	add_to_sym_list( head, "KBD", 0x6000, 0 );
+}
 
-	while ( current->next != NULL ) {
+int add_to_sym_list( sym_node_t *head, char *string, int value, char offset ) {
+	sym_node_t *current = head;
+	int update = 0;
+
+	// Check for last node or string equivalence
+	while ( current->next != NULL && strcmp( current->symbol, string ) != 0 ) {
+		// Do loop again
 		current = current->next;
 	}
 
+	// See if value is merely being updated
+	if ( strcmp( current->symbol, string ) == 0 ) {
+		update = 1;
+	}
+
 	// Catch first node empty
-	if ( current->symbol != NULL ) {
-		current->next = malloc( sizeof( sym_node_t ) );
+	if ( current->symbol != NULL && update == 0 ) {
+		current->next = calloc( 1, sizeof( sym_node_t ) );
 		current = current->next;
 	}
 
 	current->symbol = string;
 	current->memory_location = value;
+	current->offset = offset;
+
+	return update;
 }
 
 /**
