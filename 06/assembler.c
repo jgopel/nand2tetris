@@ -229,15 +229,17 @@ int add_to_sym_list( sym_node_t *head, char *string, int value, char offset ) {
 		current = current->next;
 	}
 
-	// See if value is merely being updated
-	if ( strcmp( current->symbol, string ) == 0 ) {
-		update = 1;
-	}
+	if ( current->symbol != NULL ) {
+		// See if value is merely being updated
+		if ( strcmp( current->symbol, string ) == 0 ) {
+			update = 1;
+		}
 
-	// Catch first node empty
-	if ( current->symbol != NULL && update == 0 ) {
-		current->next = calloc( 1, sizeof( sym_node_t ) );
-		current = current->next;
+		// Catch first node empty
+		if ( update == 0 ) {
+			current->next = calloc( 1, sizeof( sym_node_t ) );
+			current = current->next;
+		}
 	}
 
 	current->symbol = string;
