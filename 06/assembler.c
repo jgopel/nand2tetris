@@ -17,7 +17,7 @@ typedef struct sym_node {
 } sym_node_t;
 
 unsigned int build_lists( asm_node_t*, sym_node_t*, FILE* );
-void output_list( asm_node_t*, FILE* );
+void output_list( asm_node_t*, sym_node_t*, unsigned int, FILE* );
 void generate_file( asm_node_t*, FILE* );
 void add_defaults( sym_node_t* );
 int add_to_sym_list( sym_node_t*, char*, int, char, char );
@@ -82,7 +82,7 @@ int main( int argc, char *argv[] ) {
 	free( filename );
 
 	// Output to file
-	output_list( asm_head, file_pointer );
+	output_list( asm_head, sym_head, offset, file_pointer );
 	fclose( file_pointer );
 
 	// TODO: Free memory
@@ -171,7 +171,7 @@ unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	return sym_count;
 }
 
-void output_list( asm_node_t *head, FILE *fp ) {
+void output_list( asm_node_t *head, sym_node_t *sym_head, unsigned int offset, FILE *fp ) {
 	// Setup variables
 	asm_node_t *current = head;
 	char string[ 16 ];
