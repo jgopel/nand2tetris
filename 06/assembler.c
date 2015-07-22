@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "jg-input.h"
 #include "jg-string.h"
 
@@ -98,8 +99,7 @@ int main( int argc, char *argv[] ) {
  * @param  head     First element of assembly list
  * @param  sym_head First element of symbols list
  * @param  fp       Pointer to the file to use to generate lists
- * @return          Count of how many symbols are in the table to be used as an
- *                  offset
+ * @return          Highest line number used in jump symbols
  */
 unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	// Setup variables
@@ -108,6 +108,7 @@ unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	char *symbol;
 	unsigned int line = 0;
 	unsigned int sym_count = 0;
+	unsigned int offset = 0;
 	add_defaults( sym_head );
 
 	while ( string != NULL ) {
@@ -118,8 +119,8 @@ unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 		// Handle jumps
 		if ( string[ 0 ] == '(' ) {
 			// Resize symbol
-			symbol = malloc( strlen( string ) + 1 );
-			strcpy( symbol, string );
+			symbol = malloc( strlen( string ) );
+			strcpy( symbol, string + 1 );
 
 			// Remove closing paren
 			if ( symbol[ strlen( symbol ) - 1 ] == ')' ) {
@@ -127,18 +128,19 @@ unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 			}
 
 			// Add to sym table
-			add_to_sym_list( sym_head, symbol + 1, line, 0, 1 );
+			add_to_sym_list( sym_head, symbol, line, 0, 1 );
+			offset = line;
 
 		// Everything that's not a jump
 		} else if ( strlen( string ) > 1 ) {
 			// Check for memory alias
-			if ( string[ 0 ] == '@' ) {
+			if ( string[ 0 ] == '@' && ! isdigit( (int) string[ 1 ] ) ) {
 				// Resize symbol to hold string
-				symbol = malloc( strlen( string ) + 1 );
-				strcpy( symbol, string );
+				symbol = malloc( strlen( string ) );
+				strcpy( symbol, string + 1 );
 
-				// Add or update symbol and count if necessary
-				int updated = add_to_sym_list( sym_head, symbol + 1, sym_count, 1, 0 );
+				// Add symbol. Count if necessary.
+				int updated = add_to_sym_list( sym_head, symbol, sym_count, 1, 0 );
 				if ( updated == 0 ) {
 					sym_count++;
 				}
@@ -168,7 +170,7 @@ unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	// Ensure final next is set null
 	current->next = NULL;
 
-	return sym_count;
+	return offset;
 }
 
 void output_list( asm_node_t *head, sym_node_t *sym_head, unsigned int offset, FILE *fp ) {
