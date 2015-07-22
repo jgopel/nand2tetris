@@ -9,10 +9,17 @@ typedef struct asm_node {
 	unsigned int machine_code;
 	struct asm_node *next;
 } asm_node_t;
+typedef struct sym_node {
+	char *symbol;
+	int memory_location;
+	struct sym_node *next;
+} sym_node_t;
 
+void build_sym_list( sym_node_t* );
 void build_list( asm_node_t*, FILE* );
 void output_list( asm_node_t*, FILE* );
 void generate_file( asm_node_t*, FILE* );
+void add_to_sym_list( sym_node_t*, char*, int );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
 
@@ -51,8 +58,10 @@ int main( int argc, char *argv[] ) {
 	}
 
 	// Build linked list and symbol table
-	asm_node_t *head = malloc( sizeof( asm_node_t ) );
-	build_list( head, file_pointer );
+	asm_node_t *asm_head = malloc( sizeof( asm_node_t ) );
+	sym_node_t *sym_head = malloc( sizeof( sym_node_t ) );
+	build_sym_list( sym_head );
+	build_list( asm_head, file_pointer );
 	fclose( file_pointer );
 
 	// Remove .asm extension if it exists
@@ -73,11 +82,42 @@ int main( int argc, char *argv[] ) {
 	free( filename );
 
 	// Output to file
-	output_list( head, file_pointer );
+	output_list( asm_head, file_pointer );
 	fclose( file_pointer );
 
 	// Normal exit
 	return 0;
+}
+
+void build_sym_list( sym_node_t *head ) {
+	// Registers
+	add_to_sym_list( head, "R0", 0 );
+	add_to_sym_list( head, "R1", 1 );
+	add_to_sym_list( head, "R2", 2 );
+	add_to_sym_list( head, "R3", 3 );
+	add_to_sym_list( head, "R4", 4 );
+	add_to_sym_list( head, "R5", 5 );
+	add_to_sym_list( head, "R6", 6 );
+	add_to_sym_list( head, "R7", 7 );
+	add_to_sym_list( head, "R8", 8 );
+	add_to_sym_list( head, "R9", 9 );
+	add_to_sym_list( head, "R10", 10 );
+	add_to_sym_list( head, "R11", 11 );
+	add_to_sym_list( head, "R12", 12 );
+	add_to_sym_list( head, "R13", 13 );
+	add_to_sym_list( head, "R14", 14 );
+	add_to_sym_list( head, "R15", 15 );
+
+	// Keywords
+	add_to_sym_list( head, "SP", 0 );
+	add_to_sym_list( head, "LCL", 1 );
+	add_to_sym_list( head, "ARG", 2 );
+	add_to_sym_list( head, "THIS", 3 );
+	add_to_sym_list( head, "THAT", 4 );
+
+	// Memory maps
+	add_to_sym_list( head, "SCREEN", 0x4000 );
+	add_to_sym_list( head, "KBD", 0x6000 );
 }
 
 void build_list( asm_node_t *head, FILE *fp ) {
@@ -149,6 +189,23 @@ void output_list( asm_node_t *head, FILE *fp ) {
 		// Go to next node
 		current = current->next;
 	}
+}
+
+void add_to_sym_list( sym_node_t *head, char *string, int value ) {
+	sym_node_t *current = head;
+
+	while ( current->next != NULL ) {
+		current = current->next;
+	}
+
+	// Catch first node empty
+	if ( current->symbol != NULL ) {
+		current->next = malloc( sizeof( sym_node_t ) );
+		current = current->next;
+	}
+
+	current->symbol = string;
+	current->memory_location = value;
 }
 
 /**
