@@ -91,6 +91,16 @@ int main( int argc, char *argv[] ) {
 	return 0;
 }
 
+/**
+ * Creates linked list for assembly file and symbols table
+ *
+ * @author Jonathan Gopel
+ * @param  head     First element of assembly list
+ * @param  sym_head First element of symbols list
+ * @param  fp       Pointer to the file to use to generate lists
+ * @return          Count of how many symbols are in the table to be used as an
+ *                  offset
+ */
 unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	// Setup variables
 	asm_node_t *current = head;
