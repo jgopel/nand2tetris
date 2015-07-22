@@ -1,6 +1,7 @@
 CC := gcc
 SRCDIR := .
-OBJDIR := objdir
+OBJDIR := .objdir
+DEPDIR := .depdir
 CFLAGS := -std=c11
 
 TARGET := $(SRCDIR)/assembler
@@ -24,7 +25,7 @@ release: CFLAGS += -O3
 release: $(TARGET)
 
 
-$(TARGET): $(OBJECTS) $(@:=.d)
+$(TARGET): $(OBJECTS) $(patsubst $(SRCDIR)/%,$(SRCDIR)/$(DEPDIR)/%.d,$@)
 	@echo
 	@echo " Linking..."
 	$(CC) $(CFLAGS) -o $@ $^
@@ -38,7 +39,8 @@ $(SRCDIR)/$(OBJDIR)/%.o: %.c
 %.d:
 	@echo
 	@echo " Generating dependencies..."
-	$(CC) -MM -MT "$(SRCDIR)/$(OBJDIR)/$(@:.d=.o) $(SRCDIR)/$@" -MF $@ $(@:.d=.c)
+	@mkdir -p $(SRCDIR)/$(DEPDIR)
+	$(CC) -MM -MT "$(SRCDIR)/$(OBJDIR)/$(@:.d=.o) $(SRCDIR)/$@" -MF $(SRCDIR)/$(DEPDIR)/$@ $(@:.d=.c)
 
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -52,7 +54,7 @@ clobber: clean cleanexe cleanstackdump
 cleanobj:
 	@echo
 	@echo " Cleaning objects..."
-	rm -frv *.o $(OBJDIR)
+	rm -frv *.o $(SRCDIR)/$(OBJDIR)
 
 cleanexe:
 	@echo
@@ -62,7 +64,7 @@ cleanexe:
 cleanmake:
 	@echo
 	@echo " Cleaning dependency files..."
-	rm -frv *.d
+	rm -frv *.d $(SRCDIR)/$(DEPDIR)
 
 cleanstackdump:
 	@echo
