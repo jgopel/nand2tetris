@@ -1,12 +1,14 @@
 CC := gcc
 SRCDIR := .
-OBJDIR := .objdir
-DEPDIR := .depdir
+OBJDIR := $(SRCDIR)/.objdir
+DEPDIR := $(SRCDIR)/.depdir
+EXEDIR := .
 CFLAGS := -std=c11
 
 TARGET := $(SRCDIR)/assembler
 SOURCES := $(wildcard $(SRCDIR)/*.c )
-OBJECTS := $(patsubst $(SRCDIR)/%.c,$(SRCDIR)/$(OBJDIR)/%.o,$(SOURCES))
+OBJECTS := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SOURCES))
+DEPS :=    $(patsubst $(SRCDIR)/%.c,$(DEPDIR)/%.d,$(SOURCES))
 
 .PHONY: all debug pedantic release
 
@@ -25,26 +27,26 @@ release: CFLAGS += -O3
 release: $(TARGET)
 
 
-$(TARGET): $(OBJECTS) $(patsubst $(SRCDIR)/%,$(SRCDIR)/$(DEPDIR)/%.d,$@)
+$(TARGET): $(OBJECTS)
 	@echo
 	@echo " Linking..."
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $(EXEDIR)/$@ $^
 
-$(SRCDIR)/$(OBJDIR)/%.o: %.c
+$(OBJDIR)/%.o: %.c %.d
 	@echo
 	@echo " Building objects..."
-	@mkdir -p $(SRCDIR)/$(OBJDIR)
+	@mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.d:
+%.d: %.c
 	@echo
 	@echo " Generating dependencies..."
-	@mkdir -p $(SRCDIR)/$(DEPDIR)
-	$(CC) -MM -MT "$(SRCDIR)/$(OBJDIR)/$(@:.d=.o) $(SRCDIR)/$@" -MF $(SRCDIR)/$(DEPDIR)/$@ $(@:.d=.c)
+	@mkdir -p $(DEPDIR)
+	$(CC) -MM -MT "$(OBJDIR)/$(@:.d=.o) $(DEPDIR)/$@" -MF $(DEPDIR)/$@ $(@:.d=.c)
 
 
 ifneq ($(MAKECMDGOALS),clean)
--include $(SOURCES:.c=.d)
+-include $(DEPS)
 endif
 
 .PHONY: clean clobber cleanobj cleanexe cleanmake cleanstackdump
@@ -54,7 +56,7 @@ clobber: clean cleanexe cleanstackdump
 cleanobj:
 	@echo
 	@echo " Cleaning objects..."
-	rm -frv *.o $(SRCDIR)/$(OBJDIR)
+	rm -frv *.o $(OBJDIR)
 
 cleanexe:
 	@echo
@@ -64,7 +66,7 @@ cleanexe:
 cleanmake:
 	@echo
 	@echo " Cleaning dependency files..."
-	rm -frv *.d $(SRCDIR)/$(DEPDIR)
+	rm -frv *.d $(DEPDIR)
 
 cleanstackdump:
 	@echo
