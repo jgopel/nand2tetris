@@ -105,23 +105,12 @@ int main( int argc, char *argv[] ) {
 	return 0;
 }
 
-/**
- * Creates linked list for assembly file and symbols table
- *
- * @author Jonathan Gopel
- * @param  head     First element of assembly list
- * @param  sym_head First element of symbols list
- * @param  fp       Pointer to the file to use to generate lists
- * @return          Highest line number used in jump symbols
- */
 void build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	// Setup variables
 	asm_node_t *current = head;
 	char *string = read_line( fp );
 	char *symbol;
 	unsigned int line = 0;
-	unsigned int sym_count = 0;
-	add_defaults( sym_head );
 
 	while ( string != NULL ) {
 		// Data sanitization
@@ -144,18 +133,6 @@ void build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 
 		// Everything that's not a jump
 		} else if ( strlen( string ) > 1 ) {
-			// Check for memory alias
-			if ( string[ 0 ] == '@' && ! isdigit( (int) string[ 1 ] ) ) {
-				// Resize symbol to hold string
-				symbol = malloc( strlen( string ) );
-				strcpy( symbol, string + 1 );
-
-				// Add symbol. Count if necessary.
-				int updated = add_to_sym_list( sym_head, symbol, sym_count, 1, 0 );
-				if ( updated == 0 ) {
-					sym_count++;
-				}
-			}
 
 			// Check if current node is empty
 			if ( current->assembly == NULL ) {
