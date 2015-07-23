@@ -17,18 +17,18 @@ typedef struct sym_node {
 	struct sym_node *next;
 } sym_node_t;
 
-unsigned int build_lists( asm_node_t*, sym_node_t*, FILE* );
-void output_list( asm_node_t*, sym_node_t*, unsigned int, FILE* );
-void generate_file( asm_node_t*, FILE* );
-void add_defaults( sym_node_t* );
+void build_lists( asm_node_t*, sym_node_t*, FILE* );
+void output_list( asm_node_t*, sym_node_t*, FILE* );
+unsigned int find_symbol( sym_node_t*, char* );
 int add_to_sym_list( sym_node_t*, char*, int, char, char );
+void add_defaults( sym_node_t* );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
 
 int main( int argc, char *argv[] ) {
 	// Setup variables
 	char *filename;
-	char default_file[] = "test.asm";
+	char default_file[] = "test2.asm";
 
 	// Set file name
 	if ( argc < 2 ) {
@@ -62,8 +62,21 @@ int main( int argc, char *argv[] ) {
 	// Build linked list and symbol table
 	asm_node_t *asm_head = calloc( 1, sizeof( asm_node_t ) );
 	sym_node_t *sym_head = calloc( 1, sizeof( sym_node_t ) );
-	unsigned int offset = build_lists( asm_head, sym_head, file_pointer );
+	build_lists( asm_head, sym_head, file_pointer );
 	fclose( file_pointer );
+
+
+
+
+	// XXX: DEBUG ONLY
+	sym_node_t *current = sym_head;
+	while ( current != NULL ) {
+		printf( "\n%s\t%i", current->symbol, current->memory_location );
+		current = current->next;
+	}
+
+
+
 
 	// Remove .asm extension if it exists
 	char *dot_location = strrchr( filename, '.' );
@@ -83,7 +96,7 @@ int main( int argc, char *argv[] ) {
 	free( filename );
 
 	// Output to file
-	output_list( asm_head, sym_head, offset, file_pointer );
+	output_list( asm_head, sym_head, file_pointer );
 	fclose( file_pointer );
 
 	// TODO: Free memory
@@ -101,14 +114,13 @@ int main( int argc, char *argv[] ) {
  * @param  fp       Pointer to the file to use to generate lists
  * @return          Highest line number used in jump symbols
  */
-unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
+void build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	// Setup variables
 	asm_node_t *current = head;
 	char *string = read_line( fp );
 	char *symbol;
 	unsigned int line = 0;
 	unsigned int sym_count = 0;
-	unsigned int offset = 0;
 	add_defaults( sym_head );
 
 	while ( string != NULL ) {
@@ -129,7 +141,6 @@ unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 
 			// Add to sym table
 			add_to_sym_list( sym_head, symbol, line, 0, 1 );
-			offset = line;
 
 		// Everything that's not a jump
 		} else if ( strlen( string ) > 1 ) {
@@ -169,11 +180,9 @@ unsigned int build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 
 	// Ensure final next is set null
 	current->next = NULL;
-
-	return offset;
 }
 
-void output_list( asm_node_t *head, sym_node_t *sym_head, unsigned int offset, FILE *fp ) {
+void output_list( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	// Setup variables
 	asm_node_t *current = head;
 	char string[ 16 ];
@@ -181,7 +190,7 @@ void output_list( asm_node_t *head, sym_node_t *sym_head, unsigned int offset, F
 	while ( current != NULL ) {
 		if ( current->assembly[ 0 ] == '@' ) {
 			if ( ! isdigit( (int) current->assembly[ 1 ] ) ) {
-				unsigned int memory_location = find_symbol( sym_head, current->assembly + 1, offset );
+				unsigned int memory_location = find_symbol( sym_head, current->assembly + 1 );
 				sprintf( current->assembly, "@%d", memory_location );
 			}
 			current->machine_code = a_instruction( current->assembly );
@@ -204,7 +213,7 @@ void output_list( asm_node_t *head, sym_node_t *sym_head, unsigned int offset, F
 	}
 }
 
-unsigned int find_symbol( sym_node_t *head, char *string, unsigned int offset ) {
+unsigned int find_symbol( sym_node_t *head, char *string ) {
 	// Setup variables
 	sym_node_t *current = head;
 	unsigned int output = 0;
@@ -223,41 +232,11 @@ unsigned int find_symbol( sym_node_t *head, char *string, unsigned int offset ) 
 
 	// Add offset if needed
 	if ( current->offset == 1 ) {
-		output += offset;
+		output += 16;
 	}
 
 	// Do output
 	return output;
-}
-
-void add_defaults( sym_node_t *head ) {
-	// Setup default values
-	// Registers
-	add_to_sym_list( head, "R0", 0, 0, 0 );
-	add_to_sym_list( head, "R1", 1, 0, 0 );
-	add_to_sym_list( head, "R2", 2, 0, 0 );
-	add_to_sym_list( head, "R3", 3, 0, 0 );
-	add_to_sym_list( head, "R4", 4, 0, 0 );
-	add_to_sym_list( head, "R5", 5, 0, 0 );
-	add_to_sym_list( head, "R6", 6, 0, 0 );
-	add_to_sym_list( head, "R7", 7, 0, 0 );
-	add_to_sym_list( head, "R8", 8, 0, 0 );
-	add_to_sym_list( head, "R9", 9, 0, 0 );
-	add_to_sym_list( head, "R10", 10, 0, 0 );
-	add_to_sym_list( head, "R11", 11, 0, 0 );
-	add_to_sym_list( head, "R12", 12, 0, 0 );
-	add_to_sym_list( head, "R13", 13, 0, 0 );
-	add_to_sym_list( head, "R14", 14, 0, 0 );
-	add_to_sym_list( head, "R15", 15, 0, 0 );
-	// Keywords
-	add_to_sym_list( head, "SP", 0, 0, 0 );
-	add_to_sym_list( head, "LCL", 1, 0, 0 );
-	add_to_sym_list( head, "ARG", 2, 0, 0 );
-	add_to_sym_list( head, "THIS", 3, 0, 0 );
-	add_to_sym_list( head, "THAT", 4, 0, 0 );
-	// Memory maps
-	add_to_sym_list( head, "SCREEN", 0x4000, 0, 0 );
-	add_to_sym_list( head, "KBD", 0x6000, 0, 0 );
 }
 
 int add_to_sym_list( sym_node_t *head, char *string, int value, char offset, char do_update ) {
@@ -290,6 +269,36 @@ int add_to_sym_list( sym_node_t *head, char *string, int value, char offset, cha
 	}
 
 	return updated;
+}
+
+void add_defaults( sym_node_t *head ) {
+	// Setup default values
+	// Registers
+	add_to_sym_list( head, "R0", 0, 0, 0 );
+	add_to_sym_list( head, "R1", 1, 0, 0 );
+	add_to_sym_list( head, "R2", 2, 0, 0 );
+	add_to_sym_list( head, "R3", 3, 0, 0 );
+	add_to_sym_list( head, "R4", 4, 0, 0 );
+	add_to_sym_list( head, "R5", 5, 0, 0 );
+	add_to_sym_list( head, "R6", 6, 0, 0 );
+	add_to_sym_list( head, "R7", 7, 0, 0 );
+	add_to_sym_list( head, "R8", 8, 0, 0 );
+	add_to_sym_list( head, "R9", 9, 0, 0 );
+	add_to_sym_list( head, "R10", 10, 0, 0 );
+	add_to_sym_list( head, "R11", 11, 0, 0 );
+	add_to_sym_list( head, "R12", 12, 0, 0 );
+	add_to_sym_list( head, "R13", 13, 0, 0 );
+	add_to_sym_list( head, "R14", 14, 0, 0 );
+	add_to_sym_list( head, "R15", 15, 0, 0 );
+	// Keywords
+	add_to_sym_list( head, "SP", 0, 0, 0 );
+	add_to_sym_list( head, "LCL", 1, 0, 0 );
+	add_to_sym_list( head, "ARG", 2, 0, 0 );
+	add_to_sym_list( head, "THIS", 3, 0, 0 );
+	add_to_sym_list( head, "THAT", 4, 0, 0 );
+	// Memory maps
+	add_to_sym_list( head, "SCREEN", 0x4000, 0, 0 );
+	add_to_sym_list( head, "KBD", 0x6000, 0, 0 );
 }
 
 /**
