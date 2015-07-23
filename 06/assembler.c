@@ -18,7 +18,7 @@ typedef struct sym_node {
 
 void build_lists( asm_node_t*, sym_node_t*, FILE* );
 void output_list( asm_node_t*, sym_node_t*, FILE* );
-unsigned int find_symbol( sym_node_t*, char* );
+int find_symbol( sym_node_t*, char* );
 int add_to_sym_list( sym_node_t*, char*, int, char );
 void add_defaults( sym_node_t* );
 unsigned int a_instruction( char* );
@@ -149,14 +149,34 @@ void output_list( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	// Setup variables
 	asm_node_t *current = head;
 	char string[ 16 ];
+	char *symbol;
+	unsigned int symbol_count = 0;
+	add_defaults( sym_head );
 
+	// Iterate through all elements in asm list
 	while ( current != NULL ) {
+		// If the string starts with @, check for aliases
 		if ( current->assembly[ 0 ] == '@' ) {
+			// Make sure it's not just a direct memory address
 			if ( ! isdigit( (int) current->assembly[ 1 ] ) ) {
-				unsigned int memory_location = find_symbol( sym_head, current->assembly + 1 );
+				// Check if the symbol is set already
+				int memory_location = find_symbol( sym_head, current->assembly + 1 );
+
+				// Handle missing symbol
+				if ( memory_location < 0 ) {
+					symbol = malloc( strlen( current->assembly ) );
+					strcpy( symbol, current->assembly + 1 );
+					add_to_sym_list( sym_head, symbol, 16 + symbol_count, 0 );
+					memory_location = 16 + symbol_count;
+					symbol_count++;
+				}
+
+				// Int to string
 				sprintf( current->assembly, "@%d", memory_location );
 			}
 			current->machine_code = a_instruction( current->assembly );
+
+			// Otherwise it's a c instruction
 		} else {
 			current->machine_code = c_instruction( current->assembly );
 		}
@@ -176,24 +196,20 @@ void output_list( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 	}
 }
 
-unsigned int find_symbol( sym_node_t *head, char *string ) {
+int find_symbol( sym_node_t *head, char *string ) {
 	// Setup variables
 	sym_node_t *current = head;
-	unsigned int output = 0;
+	int output = -1;
 
 	while ( current != NULL ) {
 		// Check for termination condition
 		if ( strcmp( current->symbol, string ) == 0 ) {
-			break;
+			return current->memory_location;
 		}
 
 		current = current->next;
 	}
 
-	// Set output
-	output = current->memory_location;
-
-	// Do output
 	return output;
 }
 
