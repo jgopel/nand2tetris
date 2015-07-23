@@ -180,6 +180,10 @@ void output_list( asm_node_t *head, sym_node_t *sym_head, unsigned int offset, F
 
 	while ( current != NULL ) {
 		if ( current->assembly[ 0 ] == '@' ) {
+			if ( ! isdigit( (int) current->assembly[ 1 ] ) ) {
+				unsigned int memory_location = find_symbol( sym_head, current->assembly + 1, offset );
+				sprintf( current->assembly, "@%d", memory_location );
+			}
 			current->machine_code = a_instruction( current->assembly );
 		} else {
 			current->machine_code = c_instruction( current->assembly );
@@ -198,6 +202,32 @@ void output_list( asm_node_t *head, sym_node_t *sym_head, unsigned int offset, F
 		// Go to next node
 		current = current->next;
 	}
+}
+
+unsigned int find_symbol( sym_node_t *head, char *string, unsigned int offset ) {
+	// Setup variables
+	sym_node_t *current = head;
+	unsigned int output = 0;
+
+	while ( current != NULL ) {
+		// Check for termination condition
+		if ( strcmp( current->symbol, string ) == 0 ) {
+			break;
+		}
+
+		current = current->next;
+	}
+
+	// Set output
+	output = current->memory_location;
+
+	// Add offset if needed
+	if ( current->offset == 1 ) {
+		output += offset;
+	}
+
+	// Do output
+	return output;
 }
 
 void add_defaults( sym_node_t *head ) {
