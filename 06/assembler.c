@@ -13,14 +13,13 @@ typedef struct asm_node {
 typedef struct sym_node {
 	char *symbol;
 	int memory_location;
-	char offset;
 	struct sym_node *next;
 } sym_node_t;
 
 void build_lists( asm_node_t*, sym_node_t*, FILE* );
 void output_list( asm_node_t*, sym_node_t*, FILE* );
 unsigned int find_symbol( sym_node_t*, char* );
-int add_to_sym_list( sym_node_t*, char*, int, char, char );
+int add_to_sym_list( sym_node_t*, char*, int, char );
 void add_defaults( sym_node_t* );
 unsigned int a_instruction( char* );
 unsigned int c_instruction( char* );
@@ -116,7 +115,7 @@ void build_lists( asm_node_t *head, sym_node_t *sym_head, FILE *fp ) {
 			}
 
 			// Add to sym table
-			add_to_sym_list( sym_head, symbol, line, 0, 1 );
+			add_to_sym_list( sym_head, symbol, line, 1 );
 
 		// Everything that's not a jump
 		} else if ( strlen( string ) > 1 ) {
@@ -194,16 +193,11 @@ unsigned int find_symbol( sym_node_t *head, char *string ) {
 	// Set output
 	output = current->memory_location;
 
-	// Add offset if needed
-	if ( current->offset == 1 ) {
-		output += 16;
-	}
-
 	// Do output
 	return output;
 }
 
-int add_to_sym_list( sym_node_t *head, char *string, int value, char offset, char do_update ) {
+int add_to_sym_list( sym_node_t *head, char *string, int value, char do_update ) {
 	sym_node_t *current = head;
 	int updated = 0;
 
@@ -229,40 +223,45 @@ int add_to_sym_list( sym_node_t *head, char *string, int value, char offset, cha
 	if ( updated == 0 || ( updated == 1 && do_update == 1 ) ) {
 		current->symbol = string;
 		current->memory_location = value;
-		current->offset = offset;
 	}
 
 	return updated;
 }
 
+/**
+ * Adds default parameters to the list passed in
+ *
+ * @author Jonathan Gopel
+ * @param head List to add the defaults to
+ */
 void add_defaults( sym_node_t *head ) {
 	// Setup default values
 	// Registers
-	add_to_sym_list( head, "R0", 0, 0, 0 );
-	add_to_sym_list( head, "R1", 1, 0, 0 );
-	add_to_sym_list( head, "R2", 2, 0, 0 );
-	add_to_sym_list( head, "R3", 3, 0, 0 );
-	add_to_sym_list( head, "R4", 4, 0, 0 );
-	add_to_sym_list( head, "R5", 5, 0, 0 );
-	add_to_sym_list( head, "R6", 6, 0, 0 );
-	add_to_sym_list( head, "R7", 7, 0, 0 );
-	add_to_sym_list( head, "R8", 8, 0, 0 );
-	add_to_sym_list( head, "R9", 9, 0, 0 );
-	add_to_sym_list( head, "R10", 10, 0, 0 );
-	add_to_sym_list( head, "R11", 11, 0, 0 );
-	add_to_sym_list( head, "R12", 12, 0, 0 );
-	add_to_sym_list( head, "R13", 13, 0, 0 );
-	add_to_sym_list( head, "R14", 14, 0, 0 );
-	add_to_sym_list( head, "R15", 15, 0, 0 );
+	add_to_sym_list( head, "R0", 0, 0 );
+	add_to_sym_list( head, "R1", 1, 0 );
+	add_to_sym_list( head, "R2", 2, 0 );
+	add_to_sym_list( head, "R3", 3, 0 );
+	add_to_sym_list( head, "R4", 4, 0 );
+	add_to_sym_list( head, "R5", 5, 0 );
+	add_to_sym_list( head, "R6", 6, 0 );
+	add_to_sym_list( head, "R7", 7, 0 );
+	add_to_sym_list( head, "R8", 8, 0 );
+	add_to_sym_list( head, "R9", 9, 0 );
+	add_to_sym_list( head, "R10", 10, 0 );
+	add_to_sym_list( head, "R11", 11, 0 );
+	add_to_sym_list( head, "R12", 12, 0 );
+	add_to_sym_list( head, "R13", 13, 0 );
+	add_to_sym_list( head, "R14", 14, 0 );
+	add_to_sym_list( head, "R15", 15, 0 );
 	// Keywords
-	add_to_sym_list( head, "SP", 0, 0, 0 );
-	add_to_sym_list( head, "LCL", 1, 0, 0 );
-	add_to_sym_list( head, "ARG", 2, 0, 0 );
-	add_to_sym_list( head, "THIS", 3, 0, 0 );
-	add_to_sym_list( head, "THAT", 4, 0, 0 );
+	add_to_sym_list( head, "SP", 0, 0 );
+	add_to_sym_list( head, "LCL", 1, 0 );
+	add_to_sym_list( head, "ARG", 2, 0 );
+	add_to_sym_list( head, "THIS", 3, 0 );
+	add_to_sym_list( head, "THAT", 4, 0 );
 	// Memory maps
-	add_to_sym_list( head, "SCREEN", 0x4000, 0, 0 );
-	add_to_sym_list( head, "KBD", 0x6000, 0, 0 );
+	add_to_sym_list( head, "SCREEN", 0x4000, 0 );
+	add_to_sym_list( head, "KBD", 0x6000, 0 );
 }
 
 /**
