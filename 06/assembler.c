@@ -65,19 +65,6 @@ int main( int argc, char *argv[] ) {
 	build_lists( asm_head, sym_head, file_pointer );
 	fclose( file_pointer );
 
-
-
-
-	// XXX: DEBUG ONLY
-	sym_node_t *current = sym_head;
-	while ( current != NULL ) {
-		printf( "\n%s\t%i", current->symbol, current->memory_location );
-		current = current->next;
-	}
-
-
-
-
 	// Remove .asm extension if it exists
 	char *dot_location = strrchr( filename, '.' );
 	if ( dot_location != NULL ) {
