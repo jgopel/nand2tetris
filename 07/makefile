@@ -30,7 +30,7 @@ release: $(TARGET)
 $(TARGET): $(OBJECTS)
 	@echo
 	@echo " Linking..."
-	$(CC) $(CFLAGS) -o $(EXEDIR)/$@ $^
+	$(CC) $(CFLAGS) -o $(EXEDIR)/$@ $^ -lm
 
 $(OBJDIR)/%.o: %.c %.d
 	@echo
@@ -49,9 +49,9 @@ ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
 endif
 
-.PHONY: clean clobber cleanobj cleanexe cleanmake cleanstackdump cleanvm
-clean: cleanexe cleanvm
-clobber: cleanobj cleanexe cleanmake cleanstackdump cleanvm
+.PHONY: clean clobber cleanobj cleanexe cleanmake cleanstackdump cleanasm
+clean: cleanexe cleanasm
+clobber: cleanobj cleanexe cleanmake cleanstackdump cleanasm
 
 cleanobj:
 	@echo
@@ -73,7 +73,7 @@ cleanstackdump:
 	@echo " Cleaning stack dumps..."
 	rm -frv *.stackdump
 
-cleanvm:
+cleanasm:
 	@echo
-	@echo " Cleaning .vm files..."
-	rm -frv *.vm
+	@echo " Cleaning .asm files..."
+	rm -frv *.asm
