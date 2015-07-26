@@ -85,8 +85,6 @@ int main( int argc, char *argv[] ) {
 	output_list( asm_head, sym_head, file_pointer );
 	fclose( file_pointer );
 
-	// TODO: Free memory
-
 	// Normal exit
 	return 0;
 }
