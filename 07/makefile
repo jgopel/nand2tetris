@@ -49,9 +49,9 @@ ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
 endif
 
-.PHONY: clean clobber cleanobj cleanexe cleanmake cleanstackdump cleanhack
-clean: cleanexe cleanhack
-clobber: cleanobj cleanexe cleanmake cleanstackdump cleanhack
+.PHONY: clean clobber cleanobj cleanexe cleanmake cleanstackdump cleanvm
+clean: cleanexe cleanvm
+clobber: cleanobj cleanexe cleanmake cleanstackdump cleanvm
 
 cleanobj:
 	@echo
@@ -73,7 +73,7 @@ cleanstackdump:
 	@echo " Cleaning stack dumps..."
 	rm -frv *.stackdump
 
-cleanhack:
+cleanvm:
 	@echo
-	@echo " Cleaning .hack files..."
-	rm -frv *.hack
+	@echo " Cleaning .vm files..."
+	rm -frv *.vm
