@@ -6,11 +6,11 @@
 
 #define FILE_EXTENSION ".vm"
 
-char *open_file( int, char**, FILE** );
+char *open_file_from_args( const int, char ** const, FILE ** const );
 
 int main( int argc, char *argv[] ) {
 	FILE *file_pointer = NULL;
-	char *filename = open_file( argc, argv, &file_pointer );
+	char *filename = open_file_from_args( argc, argv, &file_pointer );
 
 	if ( file_pointer == NULL ) {
 		printf( "%s does not exist.", filename );
@@ -23,7 +23,7 @@ int main( int argc, char *argv[] ) {
 	return 0;
 }
 
-char *open_file( int argument_count, char **argument_value, FILE **fp ) {
+char *open_file_from_args( const int argument_count, char ** const argument_value, FILE ** const fp ) {
 	char *filename;
 	const char default_filename[] = "test";
 
