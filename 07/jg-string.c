@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
@@ -110,4 +111,27 @@ void int_to_binary_string( unsigned int input, char* output, int number_of_bits 
 		// Add value to array
 		output[ element ] = ( value & 1 ) + '0';
 	}
+}
+
+/**
+ * Replaces the extension on a file with a new extension
+ *
+ * @author Jonathan Gopel
+ * @param  input_filename The string to be modified
+ * @param  new_extension  The extension to add
+ * @return                Input string modified with new extension
+ */
+char* replace_extension( char* const input_filename, char* const new_extension ) {
+	char* filename = malloc( strlen( input_filename ) + 1 );
+	strcpy( filename, input_filename );
+
+	char *dot_position = strrchr( filename, '.' );
+	if ( dot_position != NULL ) {
+		*dot_position = '\0';
+	}
+
+	filename = realloc( filename, strlen( filename ) + strlen( new_extension ) + 1 );
+	filename = strcat( filename, new_extension );
+
+	return filename;
 }

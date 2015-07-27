@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "jg-files.h"
+#include "jg-string.h"
 
 #define INPUT_EXTENSION ".vm"
 #define OUTPUT_EXTENSION ".asm"
 
 char* open_file_from_args( const int, char* * const, FILE* * const );
-char* replace_extension( char* const, char* const );
 
 int main( int argc, char* argv[] ) {
 	FILE* file_pointer = NULL;
@@ -53,19 +53,4 @@ char* open_file_from_args( const int argument_count, char ** const argument_valu
 	free( filename );
 
 	return output;
-}
-
-char* replace_extension( char* const input_filename, char* const new_extension ) {
-	char* filename = malloc( strlen( input_filename ) + 1 );
-	strcpy( filename, input_filename );
-
-	char *dot_position = strrchr( filename, '.' );
-	if ( dot_position != NULL ) {
-		*dot_position = '\0';
-	}
-
-	filename = realloc( filename, strlen( filename ) + strlen( new_extension ) + 1 );
-	filename = strcat( filename, new_extension );
-
-	return filename;
 }
