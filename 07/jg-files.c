@@ -64,14 +64,17 @@ unsigned int count_lines( FILE *fp ) {
  * @param  fp             Pointer to store the result in
  * @return                Filename that was opened
  */
-char* open_file_with_extension( char* filename, char* const file_extension, FILE* * const fp ) {
-	*fp = fopen( filename, "r" );
-	if ( *fp == NULL && ! strstr( filename, file_extension ) ) {
-		filename = realloc( filename, strlen( filename ) + strlen( file_extension ) + 1 );
-		strcat( filename, file_extension );
+char* open_file_with_extension( char* const filename, char* const file_extension, FILE* * const fp, char* open_parameters ) {
+	char* file_used = malloc( strlen( filename ) + 1 );
+	strcpy( file_used, filename );
 
-		*fp = fopen( filename, "r" );
+	*fp = fopen( file_used, open_parameters );
+	if ( *fp == NULL && ! strstr( file_used, file_extension ) ) {
+		file_used = realloc( file_used, strlen( file_used ) + strlen( file_extension ) + 1 );
+		strcat( file_used, file_extension );
+
+		*fp = fopen( file_used, open_parameters );
 	}
 
-	return filename;
+	return file_used;
 }
