@@ -7,6 +7,7 @@
 #define FILE_EXTENSION ".vm"
 
 char *open_file_from_args( const int, char ** const, FILE ** const );
+char *open_file( char*, char * const, FILE ** const );
 
 int main( int argc, char *argv[] ) {
 	FILE *file_pointer = NULL;
@@ -35,10 +36,16 @@ char *open_file_from_args( const int argument_count, char ** const argument_valu
 		strcpy( filename, argument_value[ 1 ] );
 	}
 
+	filename = open_file( filename, FILE_EXTENSION, fp );
+
+	return filename;
+}
+
+char *open_file( char *filename, char * const file_extension, FILE ** const fp ) {
 	*fp = fopen( filename, "r" );
-	if ( *fp == NULL && ! strstr( filename, FILE_EXTENSION ) ) {
-		filename = realloc( filename, strlen( filename ) + strlen( FILE_EXTENSION ) + 1 );
-		strcat( filename, FILE_EXTENSION );
+	if ( *fp == NULL && ! strstr( filename, file_extension ) ) {
+		filename = realloc( filename, strlen( filename ) + strlen( file_extension ) + 1 );
+		strcat( filename, file_extension );
 
 		*fp = fopen( filename, "r" );
 	}
