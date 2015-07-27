@@ -5,10 +5,10 @@
 #include "jg-files.h"
 
 /**
- * Opens a file based on user input
+ * Opens the file specified by the user via stdin
  *
  * @author Jonathan Gopel
- * @param fp Pointer to hold the file. Must start NULL
+ * @return Pointer to the opened file
  */
 FILE *open_specified_file() {
 	// Setup variables
@@ -61,8 +61,8 @@ unsigned int count_lines( FILE *fp ) {
  * @author Jonathan Gopel
  * @param  filename       Name of the file to open
  * @param  file_extension Name of extension to try
- * @param  fp             Pointer to store the result in
  * @param  open_mode      Mode to open the file in
+ * @param  fp             Pointer to store the result in
  * @return                Filename that was opened
  */
 char* open_file_with_extension( char* const filename, char* const file_extension, char* const open_mode, FILE* * const fp ) {
