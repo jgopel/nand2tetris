@@ -3,6 +3,6 @@
 
 FILE* open_specified_file();
 unsigned int count_lines( FILE* );
-char* open_file_with_extension( char*, char* const, FILE* * const, char* );
+char* open_file_with_extension( char*, char* const, char* const, FILE* * const );
 
 #endif

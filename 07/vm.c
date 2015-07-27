@@ -34,7 +34,7 @@ char* open_file_from_args( const int argument_count, char ** const argument_valu
 		strcpy( filename, argument_value[ 1 ] );
 	}
 
-	filename = open_file_with_extension( filename, FILE_EXTENSION, fp, "r" );
+	filename = open_file_with_extension( filename, FILE_EXTENSION, "r", fp );
 
 	return filename;
 }

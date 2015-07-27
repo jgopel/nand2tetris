@@ -65,7 +65,7 @@ unsigned int count_lines( FILE *fp ) {
  * @param  open_mode      Mode to open the file in
  * @return                Filename that was opened
  */
-char* open_file_with_extension( char* const filename, char* const file_extension, FILE* * const fp, char* open_mode ) {
+char* open_file_with_extension( char* const filename, char* const file_extension, char* const open_mode, FILE* * const fp ) {
 	char* file_used = malloc( strlen( filename ) + 1 );
 	strcpy( file_used, filename );
 
